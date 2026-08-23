@@ -1,0 +1,16 @@
+{
+  "name": "public-analysis-react",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "CHOKIDAR_USEPOLLING=true vite --host 0.0.0.0 --port 5173"
+  },
+  "dependencies": {
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0",
+    "vite": "^6.0.0"
+  }
+}
