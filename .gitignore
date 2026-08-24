@@ -40,8 +40,8 @@ dist-ssr/
 
 # IDEs and editors
 .idea/
+.vscode/*
 !.vscode/settings.json
-.vscode/
 *.suo
 *.ntvs*
 *.njsproj
