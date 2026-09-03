@@ -1,0 +1,1 @@
+docker run -it --rm -v .:/app -v /app/node_modules -p 5173:5173 public_analysis_react:1.0
