@@ -1,10 +1,10 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
-import { TimeSeriesChart } from "./components/time-series-chart/time-series-chart";
+import {TickerDataPoints} from "./components/ticker-data-points/ticker-datapoints"
 
 const App = () => 
 <div>
-    <TimeSeriesChart />
+    <TickerDataPoints />
 </div>;
 
 const container = document.getElementById('root');
