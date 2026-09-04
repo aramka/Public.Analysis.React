@@ -1,4 +1,5 @@
-import React, {useEffect, useState} from "react"
+import React from "react"
+import {useAsync} from "../../hooks/useAsync"
 
 export interface DataPointMetaModel{
     Name: string;
@@ -6,7 +7,7 @@ export interface DataPointMetaModel{
     RequiredParameters:string[]
 }
 
-const mockDataPointsService = {
+const dataPointsService = {
     async getDataPoints() : Promise<DataPointMetaModel[]> {
         const tickerDataPointsBaseUrl  = import.meta.env.VITE_PUBLIC_ANALYSIS_BASE_URL;
         const url = `${tickerDataPointsBaseUrl}/ticker-data-points/AAPL`;
@@ -19,35 +20,9 @@ const mockDataPointsService = {
     }
 };
 
-function useTickerDataPoints(){
-    const [dataPoints, setDataPoints] = useState<DataPointMetaModel[]>([]);
-    const [loading, setLoading] = useState<boolean>(true);
-    const [error, setError] = useState<string | null>(null);
-    useEffect(() => {
-        let isMounted = true;
-            setLoading(true);
-            mockDataPointsService
-            .getDataPoints()
-            .then(result=>{
-                if (isMounted) {
-                    setDataPoints(result);
-                    setLoading(false);
-                }
-            })
-            .catch(err => {
-                if (isMounted) {
-                    setError(err.message);
-                    setLoading(false);
-                }
-            });
-            return ()=>{isMounted = false;}
-    }, []);
+export const DataPoints: React.FC = () =>{
+    const { data, loading, error } = useAsync(() => dataPointsService.getDataPoints());
 
-    return { dataPoints, loading, error };
-}
-
-export const TickerDataPoints: React.FC = () =>{
-    const { dataPoints, loading, error } = useTickerDataPoints();
 
     if (loading) {
         return <div>Loading...</div>;
@@ -59,9 +34,9 @@ export const TickerDataPoints: React.FC = () =>{
 
     return (
         <div>
-            <h2>Ticker Data Points</h2>
+            <h2>Data Points</h2>
             <ul>
-                {dataPoints.map((point, index) => (
+                {data?.map((point, index) => (
                     <li key={index}>
                         <strong>{point.Name}</strong>
                         <p>Visuals: {point.Visuals.join(", ")}</p>
