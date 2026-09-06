@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from "react";
+import React from "react"
+import {useParams} from "react-router"
 import { 
   ResponsiveContainer, 
   LineChart, 
@@ -8,71 +9,36 @@ import {
   Tooltip, 
   CartesianGrid 
 } from "recharts";
-
+import { endpointUrls } from "../services/endPointUrls";
+import { useAsync } from "../hooks/useAsync";
 // ==========================================
 // 1. DATA LAYER (Types & Mock Service)
 // ==========================================
-export interface MetricDataPoint {
+export interface TimeSeriesDataPoint {
   timestamp: string;
   value: number;
 }
 
-const mockChartService = {
-  async fetchMetrics(): Promise<MetricDataPoint[]> {
-    // Simulates a 300ms network round-trip delay
-    await new Promise((resolve) => setTimeout(resolve, 300));
-    return [
-      { timestamp: "08:00", value: 34 },
-      { timestamp: "09:00", value: 45 },
-      { timestamp: "10:00", value: 42 },
-      { timestamp: "11:00", value: 68 },
-      { timestamp: "12:00", value: 55 },
-      { timestamp: "13:00", value: 72 },
-      { timestamp: "14:00", value: 61 },
-    ];
+const timeSeriesDataService = {
+  async fetchConceptTimeSeries(ticker: string, concept: string): Promise<TimeSeriesDataPoint[]> {
+    const timeSeriesUrl = endpointUrls.visualTimeSeries(ticker, concept);
+    const response = await fetch(timeSeriesUrl);
+    const data = await response.json();
+    return data;
   }
 };
 
 // ==========================================
-// 2. STATE LAYER (Custom Hook pattern)
-// ==========================================
-function useChartData() {
-  const [data, setData] = useState<MetricDataPoint[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    let isMounted = true;
-
-    mockChartService.fetchMetrics()
-      .then((result) => {
-        if (isMounted) {
-          setData(result);
-          setIsLoading(false);
-        }
-      })
-      .catch((err) => {
-        if (isMounted) {
-          setError(err instanceof Error ? err.message : "An error occurred");
-          setIsLoading(false);
-        }
-      });
-
-    return () => {
-      isMounted = false; // Prevents memory leaks if component unmounts mid-fetch
-    };
-  }, []);
-
-  return { data, isLoading, error };
-}
-
-// ==========================================
 // 3. PRESENTATION LAYER (UI Component)
 // ==========================================
-export const TimeSeriesChart: React.FC = () => {
-  const { data, isLoading, error } = useChartData();
+export const TimeSeries: React.FC = () => {
+  let { ticker, concept } = useParams();
+  if(!ticker || !concept) {
+    return <div style={{ padding: "24px", color: "#666" }}>Invalid ticker or concept</div>;
+  }
+  const { data, loading, error } =  useAsync(() => timeSeriesDataService.fetchConceptTimeSeries(ticker, concept));
 
-  if (isLoading) {
+  if (loading) {
     return <div style={{ padding: "24px", color: "#666" }}>Loading metrics...</div>;
   }
 
