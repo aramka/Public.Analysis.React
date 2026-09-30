@@ -5,5 +5,8 @@ export const endpointUrls = {
   },
   fetchTickerConceptMetas(ticker: string) {
     return `${this.publicAnalysisBaseUrl}/concept-metas/${ticker}`;
+  },
+  getStatementTree(ticker:string, statementName:string){
+    return `${this.publicAnalysisBaseUrl}/fasb-taxonomies/statement-tree/${ticker}/${statementName}`
   }
 };

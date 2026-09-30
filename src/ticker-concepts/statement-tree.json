@@ -1,0 +1,73 @@
+{
+  "file": "us-gaap-stm-scf-indir-pre-2026.json",
+  "totalTreeFactsCount": 730,
+  "totalTickerFactsCount": 503,
+  "matchingFactsCount": 53,
+  "coverage": 7.260273972602739,
+  "tree": {
+    "us-gaap_ProceedsFromRepaymentsOfLongTermDebtAndCapitalSecuritiesAbstract": {
+      "XsElement": {
+        "ElementId": "us-gaap_ProceedsFromRepaymentsOfLongTermDebtAndCapitalSecuritiesAbstract",
+        "Abstract": true,
+        "Balance": "",
+        "Id": "us-gaap_ProceedsFromRepaymentsOfLongTermDebtAndCapitalSecuritiesAbstract",
+        "Name": "ProceedsFromRepaymentsOfLongTermDebtAndCapitalSecuritiesAbstract",
+        "Nillable": true,
+        "PeriodType": "duration",
+        "Type": "xbrli:stringItemType"
+      },
+      "ParentsElementIds": [
+        "us-gaap_ProceedsFromRepaymentsOfDebtAbstract"
+      ],
+      "Children": [
+        {
+          "ChildElementId": "us-gaap_ProceedsFromIssuanceOfLongTermDebtAndCapitalSecuritiesNetAbstract",
+          "ChildLabel": "Proceeds from Issuance of Long-Term Debt and Capital Securities, Net [Abstract]",
+          "Order": 10
+        },
+        {
+          "ChildElementId": "us-gaap_RepaymentsOfLongTermDebtAndCapitalSecuritiesAbstract",
+          "ChildLabel": "Repayment of Long-Term Debt, Long-Term Lease Obligation, and Capital Security [Abstract]",
+          "Order": 20
+        },
+        {
+          "ChildElementId": "us-gaap_ProceedsFromRepaymentsOfSecuredDebt",
+          "ChildLabel": "Proceeds from (Repayments of) Secured Debt",
+          "Order": 30
+        },
+        {
+          "ChildElementId": "us-gaap_ProceedsFromRepaymentsOfNotesPayable",
+          "ChildLabel": "Proceeds from (Repayments of) Notes Payable",
+          "Order": 40
+        },
+        {
+          "ChildElementId": "us-gaap_ProceedsFromRepaymentsOfFirstMortgageBond",
+          "ChildLabel": "Proceeds from (Repayments of) First Mortgage Bond",
+          "Order": 50
+        },
+        {
+          "ChildElementId": "us-gaap_ProceedsFromRepaymentsOfPollutionControlBond",
+          "ChildLabel": "Proceeds from (Repayments of) Pollution Control Bond",
+          "Order": 60
+        },
+        {
+          "ChildElementId": "us-gaap_ProceedsFromRepaymentsOfRelatedPartyDebt",
+          "ChildLabel": "Proceeds from (Repayments of) Related Party Debt",
+          "Order": 70
+        },
+        {
+          "ChildElementId": "us-gaap_ProceedsFromRepaymentsOfOtherLongTermDebt",
+          "ChildLabel": "Proceeds from (Repayments of) Other Long-Term Debt",
+          "Order": 80
+        },
+        {
+          "ChildElementId": "us-gaap_ProceedsFromRepaymentsOfLongTermDebtAndCapitalSecurities",
+          "ChildLabel": "Proceeds from (Repayments of) Long-Term Debt and Capital Securities, Total",
+          "Order": 90
+        }
+      ],
+      "Label": "Proceeds from (Repayments of) Long-Term Debt and Capital Securities [Abstract]",
+      "ElementId": "us-gaap_ProceedsFromRepaymentsOfLongTermDebtAndCapitalSecuritiesAbstract"
+    }
+  }
+}
