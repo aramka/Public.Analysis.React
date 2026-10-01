@@ -31,6 +31,7 @@ interface StatementTreeResponse {
     matchingFactsCount: number;
     coverage: number;
     tree: Record<string, StatementTreeNode>;
+    description:string
 }
 
 const statementTreeService = {
@@ -46,27 +47,27 @@ const statementTreeService = {
 const StatementTreeBranch: React.FC<{
     nodeId: string;
     tree: Record<string, StatementTreeNode>;
-    ancestors: Set<string>;
-}> = ({ nodeId, tree, ancestors }) => {
+    // ancestors: Set<string>;
+}> = ({ nodeId, tree }) => {
     const node = tree[nodeId];
-    if (!node || ancestors.has(nodeId)) {
+    if (!node ) {
         return null;
     }
 
-    const nextAncestors = new Set(ancestors).add(nodeId);
-    const children = [...(node.Children ?? [])].sort((left, right) => left.Order - right.Order);
+    const children = [...(node.Children ?? [])]
+    .sort((left, right) => left.Order - right.Order)
+    .map(c=>{ return {ChildElementId:c.ChildElementId,Order:c.Order, ChildLabel:c.ChildLabel,UniqueKey:`${c.ChildElementId}${c.Order}`}});
 
     return (
         <li>
             <details open>
                 <summary>
-                    {node.Label || node.XsElement.Name || node.ElementId}
-                    {node.XsElement.Abstract && <small> (Abstract)</small>}
+                    <span>{node.XsElement.Name}</span>
                 </summary>
                 <ul>
                     {children.map((child) => tree[child.ChildElementId]
-                        ? <StatementTreeBranch key={child.ChildElementId} nodeId={child.ChildElementId} tree={tree} ancestors={nextAncestors} />
-                        : <li key={child.ChildElementId}>{child.ChildLabel}</li>)}
+                        ? <StatementTreeBranch key={child.UniqueKey} nodeId={child.ChildElementId} tree={tree} />
+                        : <li key={child.UniqueKey}>Not found in tree: {child.ChildElementId}</li>)}
                 </ul>
             </details>
         </li>
@@ -99,6 +100,7 @@ export const TickerConcepts: React.FC = () =>{
                 {statementTreeError && <p>Error: {statementTreeError.message}</p>}
                 {statementTreeResponse && (
                     <>
+                        <p>{statementTreeResponse.description}</p>
                         <p>
                             {statementTreeResponse.matchingFactsCount} matching facts / {statementTreeResponse.totalTreeFactsCount} tree facts
                             ({statementTreeResponse.coverage.toFixed(2)}% coverage)
@@ -107,7 +109,7 @@ export const TickerConcepts: React.FC = () =>{
                             {Object.entries(statementTreeResponse.tree)
                                 .filter(([, node]) => !node.ParentsElementIds?.some((parentId) => parentId in statementTreeResponse.tree))
                                 .map(([elementId]) => (
-                                    <StatementTreeBranch key={elementId} nodeId={elementId} tree={statementTreeResponse.tree} ancestors={new Set()} />
+                                    <StatementTreeBranch key={elementId} nodeId={elementId} tree={statementTreeResponse.tree} />
                                 ))}
                         </ul>
                     </>
