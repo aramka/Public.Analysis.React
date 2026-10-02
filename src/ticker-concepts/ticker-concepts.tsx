@@ -47,8 +47,8 @@ const statementTreeService = {
 const StatementTreeBranch: React.FC<{
     nodeId: string;
     tree: Record<string, StatementTreeNode>;
-    // ancestors: Set<string>;
-}> = ({ nodeId, tree }) => {
+    label?:string;
+}> = ({ nodeId, tree, label }) => {
     const node = tree[nodeId];
     if (!node ) {
         return null;
@@ -62,11 +62,11 @@ const StatementTreeBranch: React.FC<{
         <li>
             <details open>
                 <summary>
-                    <span>{node.XsElement.Name}</span>
+                    <span>{label || node.XsElement.Name}</span>
                 </summary>
                 <ul>
                     {children.map((child) => tree[child.ChildElementId]
-                        ? <StatementTreeBranch key={child.UniqueKey} nodeId={child.ChildElementId} tree={tree} />
+                        ? <StatementTreeBranch key={child.UniqueKey} nodeId={child.ChildElementId} tree={tree} label={child.ChildLabel} />
                         : <li key={child.UniqueKey}>Not found in tree: {child.ChildElementId}</li>)}
                 </ul>
             </details>
