@@ -108,8 +108,8 @@ export const TickerConcepts: React.FC = () =>{
                         <ul>
                             {Object.entries(statementTreeResponse.tree)
                                 .filter(([, node]) => !node.ParentsElementIds?.some((parentId) => parentId in statementTreeResponse.tree))
-                                .map(([elementId]) => (
-                                    <StatementTreeBranch key={elementId} nodeId={elementId} tree={statementTreeResponse.tree} />
+                                .map(([, node]) => (
+                                    <StatementTreeBranch key={node.ElementId} nodeId={node.ElementId} tree={statementTreeResponse.tree} label={node.Label} />
                                 ))}
                         </ul>
                     </>
