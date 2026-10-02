@@ -1,12 +1,12 @@
 export const endpointUrls = {
   publicAnalysisBaseUrl: import.meta.env.VITE_PUBLIC_ANALYSIS_BASE_URL,
-  visualTimeSeries(ticker: string, concept: string) {
-    return `${this.publicAnalysisBaseUrl}/${ticker}/${concept}/time-series`;
+  visuals(visualType:string, dataSetName:string, datapointName:string, entity:string) {
+    return `${this.publicAnalysisBaseUrl}/visuals/${visualType}/${dataSetName}/${datapointName}/${entity}`;
   },
   fetchTickerConceptMetas(ticker: string) {
     return `${this.publicAnalysisBaseUrl}/concept-metas/${ticker}`;
   },
-  getStatementTree(ticker:string, statementName:string){
-    return `${this.publicAnalysisBaseUrl}/fasb-taxonomies/statement-tree/${ticker}/${statementName}`
+  getStatementTree(statementTreeType:string, statementName:string, entity:string){
+    return `${this.publicAnalysisBaseUrl}/statement-tree/${statementTreeType}/${statementName}/${entity}/`
   }
 };

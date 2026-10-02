@@ -7,13 +7,13 @@ export enum Visual {
     TimeSeries="time-series"
 }
 
-interface StatementTreeChild {
+interface FactNodeChild {
     ChildElementId: string;
     ChildLabel: string;
     Order: number;
 }
 
-interface StatementTreeNode {
+interface FactNode {
     ElementId: string;
     Label: string;
     XsElement: {
@@ -21,40 +21,54 @@ interface StatementTreeNode {
         Name?: string;
     };
     ParentsElementIds?: string[];
-    Children?: StatementTreeChild[];
+    Children?: FactNodeChild[];
+}
+enum VisualTypes{
+    TimeSeries="time-series"
+}
+interface FactNodeVisual{
+    visualType:VisualTypes,
+    dataSetName:string,
+    datapointName:string
+}
+interface FactNodeVisualsModel{
+    factNode:FactNode;
+    visuals:FactNodeVisual[]
 }
 
-interface StatementTreeResponse {
+interface StatementTreeResult {
     file: string;
     totalTreeFactsCount: number;
     totalTickerFactsCount: number;
     matchingFactsCount: number;
     coverage: number;
-    tree: Record<string, StatementTreeNode>;
+    tree: Record<string, FactNodeVisualsModel>;
     description:string
 }
 
 const statementTreeService = {
-    async fetchStatementTree(ticker: string, statementName: string): Promise<StatementTreeResponse> {
-        const response = await fetch(endpointUrls.getStatementTree(ticker, statementName));
+    async fetchStatementTree(ticker: string, statementName: string): Promise<StatementTreeResult> {
+        // TODO: put the fasb-taxonomies magic string somewhere
+        const response = await fetch(endpointUrls.getStatementTree("fasb-taxonomies", statementName, ticker));
         if (!response.ok) {
             throw new Error("Failed to fetch statement tree");
         }
-        return await response.json() as StatementTreeResponse;
+        return await response.json() as StatementTreeResult;
     }
 };
 
 const StatementTreeBranch: React.FC<{
+    ticker:string;
     nodeId: string;
-    tree: Record<string, StatementTreeNode>;
+    tree: Record<string, FactNodeVisualsModel>;
     label?:string;
-}> = ({ nodeId, tree, label }) => {
+}> = ({ ticker, nodeId, tree, label }) => {
     const node = tree[nodeId];
     if (!node ) {
         return null;
     }
 
-    const children = [...(node.Children ?? [])]
+    const children = [...(node.factNode.Children ?? [])]
     .sort((left, right) => left.Order - right.Order)
     .map(c=>{ return {ChildElementId:c.ChildElementId,Order:c.Order, ChildLabel:c.ChildLabel,UniqueKey:`${c.ChildElementId}${c.Order}`}});
 
@@ -62,11 +76,17 @@ const StatementTreeBranch: React.FC<{
         <li>
             <details open>
                 <summary>
-                    <span>{label || node.XsElement.Name}</span>
+                    <span>{label || node.factNode.XsElement.Name}</span>
+                    <span>
+                         {
+                            node.visuals.map((v)=><a key={v.visualType} href={`/${ticker}/${v.dataSetName}/${v.datapointName}/${v.visualType}`} >{v.visualType}</a>)
+                        }
+                    </span>
+
                 </summary>
                 <ul>
                     {children.map((child) => tree[child.ChildElementId]
-                        ? <StatementTreeBranch key={child.UniqueKey} nodeId={child.ChildElementId} tree={tree} label={child.ChildLabel} />
+                        ? <StatementTreeBranch ticker={ticker} key={child.UniqueKey} nodeId={child.ChildElementId} tree={tree} label={child.ChildLabel} />
                         : <li key={child.UniqueKey}>Not found in tree: {child.ChildElementId}</li>)}
                 </ul>
             </details>
@@ -107,9 +127,9 @@ export const TickerFacts: React.FC = () =>{
                         </p>
                         <ul>
                             {Object.entries(statementTreeResponse.tree)
-                                .filter(([, node]) => !node.ParentsElementIds?.some((parentId) => parentId in statementTreeResponse.tree))
+                                .filter(([, node]) => !node.factNode.ParentsElementIds?.some((parentId) => parentId in statementTreeResponse.tree))
                                 .map(([, node]) => (
-                                    <StatementTreeBranch key={node.ElementId} nodeId={node.ElementId} tree={statementTreeResponse.tree} label={node.Label} />
+                                   <StatementTreeBranch ticker={ticker} key={node.factNode.ElementId} nodeId={node.factNode.ElementId} tree={statementTreeResponse.tree} label={node.factNode.Label} /> 
                                 ))}
                         </ul>
                     </>

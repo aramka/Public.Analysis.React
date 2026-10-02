@@ -20,8 +20,8 @@ export interface TimeSeriesDataPoint {
 }
 
 const timeSeriesDataService = {
-  async fetchConceptTimeSeries(ticker: string, concept: string): Promise<TimeSeriesDataPoint[]> {
-    const timeSeriesUrl = endpointUrls.visualTimeSeries(ticker, concept);
+  async fetchTimeSeries(ticker: string, dataSetName:string, datapointName: string, visualType:string): Promise<TimeSeriesDataPoint[]> {
+    const timeSeriesUrl = endpointUrls.visuals(visualType, dataSetName, datapointName, ticker)
     const response = await fetch(timeSeriesUrl);
     const data = await response.json();
     return data;
@@ -32,11 +32,13 @@ const timeSeriesDataService = {
 // 3. PRESENTATION LAYER (UI Component)
 // ==========================================
 export const TimeSeries: React.FC = () => {
-  let { ticker, concept } = useParams();
-  if(!ticker || !concept) {
-    return <div style={{ padding: "24px", color: "#666" }}>Invalid ticker or concept</div>;
+
+
+  let { ticker, dataSetName, dataPointName } = useParams();
+  if(!ticker || !dataSetName || !dataPointName) {
+    return <div style={{ padding: "24px", color: "#666" }}>{`No ticker or data set or datapoint specified. ${ticker}, ${dataSetName}, ${dataPointName}`}</div>;
   }
-  const { data, loading, error } =  useAsync(() => timeSeriesDataService.fetchConceptTimeSeries(ticker, concept));
+  const { data, loading, error } =  useAsync(() => timeSeriesDataService.fetchTimeSeries(ticker, dataSetName, dataPointName,"time-series"));
 
   if (loading) {
     return <div style={{ padding: "24px", color: "#666" }}>Loading metrics...</div>;
@@ -45,7 +47,11 @@ export const TimeSeries: React.FC = () => {
   if (error) {
     return <div style={{ padding: "24px", color: "#ef4444" }}>Error: {error}</div>;
   }
-
+  // 2. Format the numeric tick into a readable date string
+  const formatXAxisTick = (tickItem:number) => {
+    const date = new Date(tickItem*1000);
+    return date.toISOString().split('T')[0];
+  };
   return (
     <div style={{ 
       width: "100%", 
@@ -60,18 +66,19 @@ export const TimeSeries: React.FC = () => {
       </h3>
       <div style={{ width: "100%", height: 300 }}>
         <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={data} margin={{ top: 5, right: 20, left: -20, bottom: 0 }}>
+          <LineChart data={data??undefined} margin={{ top: 5, right: 20, left: -20, bottom: 0 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
             <XAxis 
-              dataKey="timestamp" 
+              dataKey="timeStamp" 
               stroke="#9ca3af" 
               fontSize={12} 
-              tickLine={false}
+              tickLine={true}
+              tickFormatter={formatXAxisTick}
             />
             <YAxis 
               stroke="#9ca3af" 
               fontSize={12} 
-              tickLine={false} 
+              tickLine={true} 
             />
             <Tooltip 
               contentStyle={{ 
