@@ -74,7 +74,7 @@ const StatementTreeBranch: React.FC<{
     );
 };
 
-export const TickerConcepts: React.FC = () =>{
+export const TickerFacts: React.FC = () =>{
     const { ticker, statement } = useParams();
    
     if(!ticker)

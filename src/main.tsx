@@ -1,4 +1,4 @@
-import {TickerConcepts} from "./ticker-concepts/ticker-concepts"
+import {TickerFacts} from "./ticker-facts/ticker-facts"
 import {TimeSeries} from "./time-series/time-series"
 import { createBrowserRouter } from "react-router";
 import { RouterProvider } from "react-router/dom";
@@ -8,7 +8,7 @@ import ReactDOM from "react-dom/client";
 const router = createBrowserRouter([
   {
     path: "/:ticker/:statement",
-    Component:TickerConcepts
+    Component:TickerFacts
   },
   {
     path: "/:ticker/:concept/time-series",
