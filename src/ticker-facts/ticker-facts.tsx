@@ -26,14 +26,9 @@ interface FactNode {
 enum VisualTypes{
     TimeSeries="time-series"
 }
-interface FactNodeVisual{
-    visualType:VisualTypes,
-    dataSetName:string,
-    datapointName:string
-}
 interface FactNodeVisualsModel{
     factNode:FactNode;
-    visuals:FactNodeVisual[]
+    visuals:VisualTypes[]
 }
 
 interface StatementTreeResult {
@@ -57,6 +52,8 @@ const statementTreeService = {
     }
 };
 
+export const FactsDataSetName:string="CompanyFacts"
+
 const StatementTreeBranch: React.FC<{
     ticker:string;
     nodeId: string;
@@ -79,7 +76,16 @@ const StatementTreeBranch: React.FC<{
                     <span>{label || node.factNode.XsElement.Name}</span>
                     <span>
                          {
-                            node.visuals.map((v)=><a key={v.visualType} href={`/${ticker}/${v.dataSetName}/${v.datapointName}/${v.visualType}`} >{v.visualType}</a>)
+                            node.visuals.map((visual)=>
+                                    {
+                                        
+                                        const path:string[] = [ticker,FactsDataSetName, node.factNode.XsElement.Name ?? "",visual]
+                                        const key:string=`${path.join("-")}`
+                                        const visualComponentRoute=`/${path.join("/")}`
+                                        return <a key={key} href={visualComponentRoute}>{visual}</a>
+                                            
+                                    }
+                                )
                         }
                     </span>
 

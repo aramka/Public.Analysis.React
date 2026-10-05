@@ -1,5 +1,5 @@
 import React from "react"
-import {useParams} from "react-router"
+import {useLocation} from "react-router"
 import { 
   ResponsiveContainer, 
   LineChart, 
@@ -20,8 +20,8 @@ export interface TimeSeriesDataPoint {
 }
 
 const timeSeriesDataService = {
-  async fetchTimeSeries(ticker: string, dataSetName:string, datapointName: string, visualType:string): Promise<TimeSeriesDataPoint[]> {
-    const timeSeriesUrl = endpointUrls.visuals(visualType, dataSetName, datapointName, ticker)
+  async fetchTimeSeries(path:string): Promise<TimeSeriesDataPoint[]> {
+    const timeSeriesUrl = `${endpointUrls.publicAnalysisBaseUrl}${path}`
     const response = await fetch(timeSeriesUrl);
     const data = await response.json();
     return data;
@@ -34,11 +34,10 @@ const timeSeriesDataService = {
 export const TimeSeries: React.FC = () => {
 
 
-  let { ticker, dataSetName, dataPointName } = useParams();
-  if(!ticker || !dataSetName || !dataPointName) {
-    return <div style={{ padding: "24px", color: "#666" }}>{`No ticker or data set or datapoint specified. ${ticker}, ${dataSetName}, ${dataPointName}`}</div>;
-  }
-  const { data, loading, error } =  useAsync(() => timeSeriesDataService.fetchTimeSeries(ticker, dataSetName, dataPointName,"time-series"));
+  // let { ticker, dataSetName, dataPointName } = useParams();
+  let location = useLocation();
+
+  const { data, loading, error } =  useAsync(() => timeSeriesDataService.fetchTimeSeries(location.pathname));
 
   if (loading) {
     return <div style={{ padding: "24px", color: "#666" }}>Loading metrics...</div>;
