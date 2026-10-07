@@ -1,0 +1,1 @@
+export interface ServiceResponse<T> { responseData: T | null; validationErrors: string[]; }

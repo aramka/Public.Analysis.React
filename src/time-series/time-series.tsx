@@ -11,6 +11,7 @@ import {
 } from "recharts";
 import { endpointUrls } from "../services/endPointUrls";
 import { useAsync } from "../hooks/useAsync";
+import { ServiceResponse } from "../services/models/service-response";
 // ==========================================
 // 1. DATA LAYER (Types & Mock Service)
 // ==========================================
@@ -20,7 +21,7 @@ export interface TimeSeriesDataPoint {
 }
 
 const timeSeriesDataService = {
-  async fetchTimeSeries(path:string): Promise<TimeSeriesDataPoint[]> {
+  async fetchTimeSeries(path:string): Promise<ServiceResponse<TimeSeriesDataPoint[]>> {
     const timeSeriesUrl = `${endpointUrls.publicAnalysisBaseUrl}${path}`
     const response = await fetch(timeSeriesUrl);
     const data = await response.json();
@@ -37,20 +38,25 @@ export const TimeSeries: React.FC = () => {
   // let { ticker, dataSetName, dataPointName } = useParams();
   let location = useLocation();
 
-  const { data, loading, error } =  useAsync(() => timeSeriesDataService.fetchTimeSeries(location.pathname));
+  // TODO: need a way to handle the error case so that we get backe a strongly typed error and can display the error message in the UI. The current implementation just displays "Error: [object Object]" which is not helpful to the user.
+  const { data, loading, error } = useAsync(() => timeSeriesDataService.fetchTimeSeries(location.pathname));
 
   if (loading) {
     return <div style={{ padding: "24px", color: "#666" }}>Loading metrics...</div>;
   }
 
   if (error) {
-    return <div style={{ padding: "24px", color: "#ef4444" }}>Error: {error}</div>;
+    return <div style={{ padding: "24px", color: "#ef4444" }}>Error: {JSON.stringify(error)}</div>;
   }
   // 2. Format the numeric tick into a readable date string
   const formatXAxisTick = (tickItem:number) => {
     const date = new Date(tickItem*1000);
     return date.toISOString().split('T')[0];
   };
+  if (!data || !data.responseData || data.responseData.length === 0) {
+    return <div style={{ padding: "24px", color: "#666" }}>No data available.</div>;
+  }
+  else{
   return (
     <div style={{ 
       width: "100%", 
@@ -65,7 +71,7 @@ export const TimeSeries: React.FC = () => {
       </h3>
       <div style={{ width: "100%", height: 300 }}>
         <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={data??undefined} margin={{ top: 5, right: 20, left: -20, bottom: 0 }}>
+          <LineChart data={data.responseData} margin={{ top: 5, right: 20, left: -20, bottom: 0 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
             <XAxis 
               dataKey="timeStamp" 
@@ -79,6 +85,7 @@ export const TimeSeries: React.FC = () => {
               fontSize={12} 
               tickLine={true} 
             />
+            {/* TODO: tool tip display the human readable date, the value, and the meta data about the datapoint. Need to be able to goto that particular datapoint very quickly for troubleshooting */}
             <Tooltip 
               contentStyle={{ 
                 fontFamily: "sans-serif", 
@@ -100,3 +107,4 @@ export const TimeSeries: React.FC = () => {
     </div>
   );
 };
+}
