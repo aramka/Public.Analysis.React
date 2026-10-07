@@ -39,8 +39,9 @@ export const TimeSeries: React.FC = () => {
   let location = useLocation();
 
   // TODO: need a way to handle the error case so that we get backe a strongly typed error and can display the error message in the UI. The current implementation just displays "Error: [object Object]" which is not helpful to the user.
-  const { data, loading, error } = useAsync(() => timeSeriesDataService.fetchTimeSeries(location.pathname));
+  const { data: serviceResponseData, loading, error } = useAsync(() => timeSeriesDataService.fetchTimeSeries(location.pathname));
 
+  //TODO: need a way to handle service response data containing validation errors. The current implementation just displays "No data available." which is not helpful to the user.
   if (loading) {
     return <div style={{ padding: "24px", color: "#666" }}>Loading metrics...</div>;
   }
@@ -53,7 +54,7 @@ export const TimeSeries: React.FC = () => {
     const date = new Date(tickItem*1000);
     return date.toISOString().split('T')[0];
   };
-  if (!data || !data.responseData || data.responseData.length === 0) {
+  if (!serviceResponseData || !serviceResponseData.responseData || serviceResponseData.responseData.length === 0) {
     return <div style={{ padding: "24px", color: "#666" }}>No data available.</div>;
   }
   else{
@@ -71,7 +72,7 @@ export const TimeSeries: React.FC = () => {
       </h3>
       <div style={{ width: "100%", height: 300 }}>
         <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={data.responseData} margin={{ top: 5, right: 20, left: -20, bottom: 0 }}>
+          <LineChart data={serviceResponseData.responseData} margin={{ top: 5, right: 20, left: -20, bottom: 0 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
             <XAxis 
               dataKey="timeStamp" 
