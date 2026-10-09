@@ -11,7 +11,7 @@ const router = createBrowserRouter([
     Component:TickerFacts
   },
   {
-    path: "/:ticker/:dataSetName/:dataPointName/time-series",
+    path: "/:ticker/:dataPointName/time-series",
     Component:TimeSeries
   }
 ]);

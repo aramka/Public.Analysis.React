@@ -7,6 +7,6 @@ export const endpointUrls = {
     return `${this.publicAnalysisBaseUrl}/concept-metas/${ticker}`;
   },
   getStatementTree(statementTreeType:string, statementName:string, entity:string){
-    return `${this.publicAnalysisBaseUrl}/statement-tree/${statementTreeType}/${statementName}/${entity}/`
+    return `${this.publicAnalysisBaseUrl}/${entity}/${statementName}/facts-tree`
   }
 };
