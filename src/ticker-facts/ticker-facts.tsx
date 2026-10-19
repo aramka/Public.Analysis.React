@@ -9,8 +9,8 @@ export enum Visual {
 }
 
 interface FactNodeChild {
-    childId: string;
-    childLabel: string;
+    id: string;
+    label: string;
     order: number;
 }
 
@@ -67,7 +67,7 @@ const StatementTreeBranch: React.FC<{
 
     const children = [...(node.factNode.children ?? [])]
     .sort((left, right) => left.order - right.order)
-    .map(c=>{ return {id:c.childId,order:c.order, childLabel:c.childLabel,uniqueKey:`${c.childId}${c.order}${c.childLabel}`} });
+    .map(child=>{ return {id:child.id,order:child.order, childLabel:child.label,uniqueKey:`${child.id}${child.order}${child.label}`} });
 
     return (
         <li>

@@ -16,8 +16,9 @@ import { ServiceResponse } from "../services/models/service-response";
 // 1. DATA LAYER (Types & Mock Service)
 // ==========================================
 export interface TimeSeriesDataPoint {
-  timestamp: string;
+  timeStamp: number | string;
   value: number;
+  [attribute: string]: unknown;
 }
 
 const timeSeriesDataService = {
@@ -29,11 +30,37 @@ const timeSeriesDataService = {
   }
 };
 
+const formatXAxisTick = (tickItem: number) => {
+  const date = new Date(tickItem * 1000);
+  return date.toISOString().split("T")[0];
+};
+
+const formatTooltipDate = (timestamp: number | string) => {
+  const numericTimestamp = Number(timestamp);
+  const date = new Date(Number.isFinite(numericTimestamp) ? numericTimestamp * 1000 : timestamp);
+  if (Number.isNaN(date.getTime())) {
+    return String(timestamp);
+  }
+
+  return new Intl.DateTimeFormat(undefined, {
+    dateStyle: "medium",
+    timeStyle: "medium",
+    timeZone: "UTC"
+  }).format(date);
+};
+
+const formatAttribute = (value: unknown) => {
+  if (typeof value === "string") {
+    return value;
+  }
+
+  return JSON.stringify(value) ?? String(value);
+};
+
 // ==========================================
 // 3. PRESENTATION LAYER (UI Component)
 // ==========================================
 export const TimeSeries: React.FC = () => {
-
 
   // let { ticker, dataSetName, dataPointName } = useParams();
   let location = useLocation();
@@ -49,11 +76,6 @@ export const TimeSeries: React.FC = () => {
   if (error) {
     return <div style={{ padding: "24px", color: "#ef4444" }}>Error: {JSON.stringify(error)}</div>;
   }
-  // 2. Format the numeric tick into a readable date string
-  const formatXAxisTick = (tickItem:number) => {
-    const date = new Date(tickItem*1000);
-    return date.toISOString().split('T')[0];
-  };
   if (!serviceResponseData || !serviceResponseData.responseData || serviceResponseData.responseData.length === 0) {
     return <div style={{ padding: "24px", color: "#666" }}>No data available.</div>;
   }
@@ -78,16 +100,46 @@ export const TimeSeries: React.FC = () => {
               dataKey="timeStamp" 
               stroke="#9ca3af" 
               fontSize={12} 
-              tickLine={true}
+              tickLine={false}
               tickFormatter={formatXAxisTick}
             />
             <YAxis 
               stroke="#9ca3af" 
               fontSize={12} 
-              tickLine={true} 
+              tickLine={false}
             />
-            {/* TODO: tool tip display the human readable date, the value, and the meta data about the datapoint. Need to be able to goto that particular datapoint very quickly for troubleshooting */}
             <Tooltip 
+              trigger="click"
+              content={({ active, payload, label }) => {
+                if (!active || payload.length === 0) {
+                  return null;
+                }
+
+                const dataPoint = payload[0].payload as TimeSeriesDataPoint;
+                const timestamp = dataPoint.timeStamp ?? label;
+
+                return (
+                  <div style={{
+                    fontFamily: "sans-serif",
+                    backgroundColor: "#fff",
+                    border: "1px solid #e5e7eb",
+                    borderRadius: "6px",
+                    padding: "10px 12px"
+                  }}>
+                    <strong>{formatTooltipDate(timestamp)}</strong>
+                    <dl style={{ margin: "8px 0 0" }}>
+                      {Object.entries(dataPoint)
+                        .filter(([attribute]) => attribute !== "timeStamp")
+                        .map(([attribute, value]) => (
+                          <React.Fragment key={attribute}>
+                            <dt style={{ fontWeight: 600 }}>{attribute}</dt>
+                            <dd style={{ margin: "0 0 4px" }}>{formatAttribute(value)}</dd>
+                          </React.Fragment>
+                        ))}
+                    </dl>
+                  </div>
+                );
+              }}
               contentStyle={{ 
                 fontFamily: "sans-serif", 
                 borderRadius: "6px", 
