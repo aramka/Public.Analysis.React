@@ -100,8 +100,15 @@ const StatementTreeBranch: React.FC<{
     );
 };
 
-export const TickerFacts: React.FC = () =>{
-    const { ticker, statement } = useParams();
+interface TickerFactsProps {
+    ticker?: string;
+    statement?: string;
+}
+
+export const TickerFacts: React.FC<TickerFactsProps> = (props) =>{
+    const routeParams = useParams();
+    const ticker = props.ticker ?? routeParams.ticker;
+    const statement = props.statement ?? routeParams.statement;
    
     if(!ticker)
         return (<h1>No ticker!</h1>)
@@ -110,13 +117,17 @@ export const TickerFacts: React.FC = () =>{
 
     const {data:serviceResponse, loading:statementTreeLoading, error:statementTreeError} = useAsync(()=>statementTreeService.fetchStatementTree(ticker!, statement!))
 
-    if(!ticker) {
-        return <div style={{ padding: "24px", color: "#666" }}>Invalid ticker</div>;
-    }
-  
     // function getConceptVisualRoute( ticker: string, concept:string, visual:Visual) {
     //     return `/${ticker}/${concept}/${visual}`;
     // }
+
+    if (statementTreeLoading) {
+        return <div style={{ padding: "24px", color: "#666" }}>Loading statement tree...</div>;
+    }
+
+    if (statementTreeError) {
+        return <div style={{ padding: "24px", color: "#ef4444" }}>Error: {statementTreeError.message}</div>;
+    }
 
     if(!serviceResponse || !serviceResponse.responseData || !serviceResponse.responseData.tree || Object.keys(serviceResponse.responseData.tree).length === 0) {
         return <div style={{ padding: "24px", color: "#666" }}>No statement tree data available.</div>;
@@ -130,8 +141,6 @@ export const TickerFacts: React.FC = () =>{
         <div>
             <section>
                 <h2>Statement Tree</h2>
-                {statementTreeLoading && <p>Loading statement tree...</p>}
-                {statementTreeError && <p>Error: {statementTreeError.message}</p>}
                 {parents.length} parent nodes
                 {serviceResponse && (
                     <>

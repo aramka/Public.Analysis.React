@@ -60,13 +60,18 @@ const formatAttribute = (value: unknown) => {
 // ==========================================
 // 3. PRESENTATION LAYER (UI Component)
 // ==========================================
-export const TimeSeries: React.FC = () => {
+interface TimeSeriesProps {
+  path?: string;
+}
+
+export const TimeSeries: React.FC<TimeSeriesProps> = ({ path: viewPath }) => {
 
   // let { ticker, dataSetName, dataPointName } = useParams();
-  let location = useLocation();
+  const location = useLocation();
+  const path = viewPath ?? location.pathname;
 
   // TODO: need a way to handle the error case so that we get backe a strongly typed error and can display the error message in the UI. The current implementation just displays "Error: [object Object]" which is not helpful to the user.
-  const { data: serviceResponseData, loading, error } = useAsync(() => timeSeriesDataService.fetchTimeSeries(location.pathname));
+  const { data: serviceResponseData, loading, error } = useAsync(() => timeSeriesDataService.fetchTimeSeries(path));
 
   //TODO: need a way to handle service response data containing validation errors. The current implementation just displays "No data available." which is not helpful to the user.
   if (loading) {

@@ -1,16 +1,65 @@
 import React, { useState } from "react";
+import { useAsync } from "../hooks/useAsync";
 import { Search } from "../search/search";
 import { SearchResult } from "../search/models/search-result";
+import { TickerFacts } from "../ticker-facts/ticker-facts";
+import { TimeSeries } from "../time-series/time-series";
+import { LandingPageView } from "./models/landing-page-view";
+import { landingPageViewService } from "./services/landing-page-view-service";
+
+interface SelectedViewsProps {
+  selection: SearchResult;
+}
+
+const SelectedViews: React.FC<SelectedViewsProps> = ({ selection }) => {
+  const {
+    data: views,
+    loading,
+    error
+  } = useAsync(() => landingPageViewService.getViewsForSelection(selection));
+
+  const renderView = (view: LandingPageView) => {
+    switch (view.type) {
+      case "ticker-facts":
+        return <TickerFacts key={view.id} ticker={view.ticker} statement={view.statement} />;
+      case "time-series":
+        return <TimeSeries key={view.id} path={view.path} />;
+    }
+  };
+
+  return (
+    <>
+      {loading && <p role="status">Loading views...</p>}
+      {error && <p role="alert">Could not load views: {error.message}</p>}
+      {views?.map(renderView)}
+    </>
+  );
+};
 
 export const LandingPage: React.FC = () => {
-  const [selectedResult, setSelectedResult] = useState<SearchResult | null>(null);
+  const [selectionRequest, setSelectionRequest] = useState<{
+    result: SearchResult;
+    requestId: number;
+  } | null>(null);
+
+  const handleSelect = (result: SearchResult) => {
+    setSelectionRequest((current) => ({
+      result,
+      requestId: (current?.requestId ?? 0) + 1
+    }));
+  };
 
   return (
     <main>
       <h1>Public Analysis</h1>
       <p>Explore public company facts and time-series data.</p>
-      <Search onSelect={setSelectedResult} />
-      {selectedResult && <p role="status">Selected: {selectedResult.label}</p>}
+      <Search onSelect={handleSelect} />
+      {selectionRequest && (
+        <SelectedViews
+          key={selectionRequest.requestId}
+          selection={selectionRequest.result}
+        />
+      )}
     </main>
   );
 };
