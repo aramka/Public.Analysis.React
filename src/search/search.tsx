@@ -1,16 +1,15 @@
-import React, { useEffect, useId, useState } from "react";
-import { SearchResult, SearchService } from "./models/search-result";
-import { searchService as defaultSearchService } from "./services/search-service";
+import React, { FocusEvent, KeyboardEvent, useEffect, useId, useState } from "react";
+import { SearchResult } from "./models/search-result";
+import { searchService} from "./services/search-service";
+import "./search.css";
 
 interface SearchProps {
   onSelect: (result: SearchResult) => void;
-  searchService?: SearchService;
   searchType?: string;
 }
 
 export const Search: React.FC<SearchProps> = ({
   onSelect,
-  searchService = defaultSearchService,
   searchType
 }) => {
   const inputId = useId();
@@ -19,18 +18,61 @@ export const Search: React.FC<SearchProps> = ({
   const [results, setResults] = useState<SearchResult[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
+  const [isOpen, setIsOpen] = useState(false);
+  const [activeIndex, setActiveIndex] = useState(-1);
+  const [selectedResult, setSelectedResult] = useState<SearchResult | null>(null);
+
+  const selectResult = (result: SearchResult) => {
+    setQuery(result.label);
+    setSelectedResult(result);
+    setIsOpen(false);
+    setActiveIndex(-1);
+    onSelect(result);
+  };
+
+  const handleKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === "ArrowDown") {
+      event.preventDefault();
+      setIsOpen(true);
+      if (results.length > 0) {
+        setActiveIndex((index) => (index + 1) % results.length);
+      }
+    } else if (event.key === "ArrowUp") {
+      event.preventDefault();
+      setIsOpen(true);
+      if (results.length > 0) {
+        setActiveIndex((index) => (index <= 0 ? results.length - 1 : index - 1));
+      }
+    } else if (event.key === "Enter" && isOpen && activeIndex >= 0) {
+      event.preventDefault();
+      selectResult(results[activeIndex]);
+    } else if (event.key === "Escape") {
+      setIsOpen(false);
+      setActiveIndex(-1);
+    }
+  };
+
+  const handleBlur = (event: FocusEvent<HTMLElement>) => {
+    const nextTarget = event.relatedTarget;
+    if (!(nextTarget instanceof Node) || !event.currentTarget.contains(nextTarget)) {
+      setIsOpen(false);
+      setActiveIndex(-1);
+    }
+  };
 
   useEffect(() => {
     const searchQuery = query.trim();
-    if (!searchQuery) {
+    if (!searchQuery || selectedResult?.label === query) {
       setResults([]);
       setLoading(false);
       setError(null);
+      setActiveIndex(-1);
       return;
     }
 
     let isCurrentRequest = true;
     setResults([]);
+    setActiveIndex(-1);
     setLoading(true);
     setError(null);
 
@@ -54,36 +96,65 @@ export const Search: React.FC<SearchProps> = ({
     return () => {
       isCurrentRequest = false;
     };
-  }, [query, searchService, searchType]);
+  }, [query, searchType, selectedResult]);
 
   return (
-    <section aria-labelledby={`${inputId}-heading`}>
+    <section
+      className="search"
+      aria-labelledby={`${inputId}-heading`}
+      onBlur={handleBlur}
+    >
       <h2 id={`${inputId}-heading`}>Search</h2>
       <label htmlFor={inputId}>Search</label>
-      <input
-        id={inputId}
-        type="search"
-        value={query}
-        onChange={(event) => setQuery(event.target.value)}
-        autoComplete="off"
-        aria-controls={resultsId}
-      />
-      {loading && <p role="status">Searching...</p>}
-      {error && <p role="alert">Search failed: {error.message}</p>}
-      {!loading && !error && query.trim() && results.length === 0 && (
-        <p role="status">No results found.</p>
-      )}
-      {results.length > 0 && (
-        <ul id={resultsId} aria-label="Search results">
-          {results.map((result) => (
-            <li key={result.id}>
-              <button type="button" onClick={() => onSelect(result)}>
-                {result.label}
-              </button>
-            </li>
-          ))}
-        </ul>
-      )}
+      <div className="search__control">
+        <input
+          id={inputId}
+          type="search"
+          role="combobox"
+          value={query}
+          onChange={(event) => {
+            setSelectedResult(null);
+            setQuery(event.target.value);
+            setIsOpen(true);
+          }}
+          onFocus={() => setIsOpen(true)}
+          onKeyDown={handleKeyDown}
+          autoComplete="off"
+          aria-autocomplete="list"
+          aria-expanded={isOpen && query.trim().length > 0}
+          aria-controls={resultsId}
+          aria-activedescendant={
+            isOpen && activeIndex >= 0 ? `${resultsId}-option-${activeIndex}` : undefined
+          }
+        />
+        {isOpen && query.trim() && (
+          <div className="search__dropdown">
+            {loading && <div className="search__message" role="status">Searching...</div>}
+            {error && <div className="search__message" role="alert">Search failed: {error.message}</div>}
+            {!loading && !error && results.length === 0 && (
+              <div className="search__message" role="status">No results found.</div>
+            )}
+            {!error && results.length > 0 && (
+              <ul id={resultsId} className="search__results" role="listbox" aria-label="Search results">
+                {results.map((result, index) => (
+                  <li
+                    id={`${resultsId}-option-${index}`}
+                    key={result.id}
+                    className={`search__option${index === activeIndex ? " search__option--active" : ""}`}
+                    role="option"
+                    aria-selected={index === activeIndex}
+                    onMouseEnter={() => setActiveIndex(index)}
+                    onMouseDown={(event) => event.preventDefault()}
+                    onClick={() => selectResult(result)}
+                  >
+                    {result.label}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        )}
+      </div>
     </section>
   );
 };
