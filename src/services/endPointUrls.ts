@@ -6,6 +6,13 @@ export const endpointUrls = {
   fetchTickerConceptMetas(ticker: string) {
     return `${this.publicAnalysisBaseUrl}/concept-metas/${ticker}`;
   },
+  search(query: string, searchType?: string) {
+    const searchParams = new URLSearchParams({ query });
+    if (searchType !== undefined) {
+      searchParams.set("search-type", searchType);
+    }
+    return `${this.publicAnalysisBaseUrl}/search?${searchParams.toString()}`;
+  },
   getStatementTree(statementTreeType:string, statementName:string, entity:string){
     return `${this.publicAnalysisBaseUrl}/${entity}/${statementName}/facts-tree`
   }

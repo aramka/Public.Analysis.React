@@ -1,11 +1,16 @@
 import {TickerFacts} from "./ticker-facts/ticker-facts"
 import {TimeSeries} from "./time-series/time-series"
+import {LandingPage} from "./landing-page/landing-page"
 import { createBrowserRouter } from "react-router";
 import { RouterProvider } from "react-router/dom";
 import ReactDOM from "react-dom/client";
 
 
 const router = createBrowserRouter([
+  {
+    path: "/",
+    Component: LandingPage
+  },
   {
     path: "/:ticker/:statement",
     Component:TickerFacts
