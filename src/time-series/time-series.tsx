@@ -22,9 +22,17 @@ export interface TimeSeriesDataPoint {
 }
 
 const timeSeriesDataService = {
-  async fetchTimeSeries(path:string): Promise<ServiceResponse<TimeSeriesDataPoint[]>> {
-    const timeSeriesUrl = `${endpointUrls.publicAnalysisBaseUrl}${path}`
+  async fetchTimeSeries(ticker: string, factName: string): Promise<ServiceResponse<TimeSeriesDataPoint[]>> {
+    if (!ticker || !factName) {
+      throw new Error("Ticker and fact name are required to load a time series");
+    }
+
+    const path = `/${encodeURIComponent(ticker)}/${encodeURIComponent(factName)}/time-series`;
+    const timeSeriesUrl = `${endpointUrls.publicAnalysisBaseUrl}${path}`;
     const response = await fetch(timeSeriesUrl);
+    if (!response.ok) {
+      throw new Error(`Failed to fetch time series: ${response.status}`);
+    }
     const data = await response.json();
     return data;
   }
@@ -67,14 +75,15 @@ interface TimeSeriesProps {
 
 export const TimeSeries: React.FC<TimeSeriesProps> = ({ ticker, factName }) => {
 
-  // let { ticker, dataSetName, dataPointName } = useParams();
   const location = useLocation();
-  const path = ticker && factName
-    ? `/time-series/${encodeURIComponent(ticker)}/${encodeURIComponent(factName)}`
-    : location.pathname;
+  const [routeTicker, routeFactName] = location.pathname.split("/").filter(Boolean);
+  const resolvedTicker = ticker ?? routeTicker ?? "";
+  const resolvedFactName = factName ?? routeFactName ?? "";
 
   // TODO: need a way to handle the error case so that we get backe a strongly typed error and can display the error message in the UI. The current implementation just displays "Error: [object Object]" which is not helpful to the user.
-  const { data: serviceResponseData, loading, error } = useAsync(() => timeSeriesDataService.fetchTimeSeries(path));
+  const { data: serviceResponseData, loading, error } = useAsync(
+    () => timeSeriesDataService.fetchTimeSeries(resolvedTicker, resolvedFactName)
+  );
 
   //TODO: need a way to handle service response data containing validation errors. The current implementation just displays "No data available." which is not helpful to the user.
   if (loading) {
