@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import { Search } from "../company-search/company-search";
-import { SearchResult } from "../company-search/models/search-result";
+import { Search } from "../search/search";
+import { SearchResult } from "../search/models/search-result";
 
 export const LandingPage: React.FC = () => {
   const [selectedResult, setSelectedResult] = useState<SearchResult | null>(null);
