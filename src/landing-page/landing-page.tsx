@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useAsync } from "../hooks/useAsync";
 import { Search } from "../search/search";
 import { SearchResult } from "../search/models/search-result";
-import { TickerFacts } from "../ticker-facts/ticker-facts";
+import { DataPointsViewer } from "../data-points-viewer/data-points-viewer";
 import { TimeSeries } from "../time-series/time-series";
 import { LandingPageView, LandingPageViewType } from "./models/landing-page-view";
 import { landingPageViewService } from "./services/landing-page-view-service";
@@ -20,10 +20,10 @@ const SelectedViews: React.FC<SelectedViewsProps> = ({ selection }) => {
 
   const renderView = (view: LandingPageView) => {
     switch (view.type) {
-      case LandingPageViewType.TickerFacts:
-        return <TickerFacts key={view.id} ticker={view.ticker} statement={view.statement} />;
+      case LandingPageViewType.DataPoints:
+        return <DataPointsViewer key={view.id} entity={view.entity} dataPointSet={view.dataPointSet} />;
       case LandingPageViewType.TimeSeries:
-        return <TimeSeries key={view.id} ticker={view.ticker} factName={view.factName} />;
+        return <TimeSeries key={view.id} entity={view.entity} dataPointName={view.dataPointName} />;
     }
   };
 
@@ -52,7 +52,7 @@ export const LandingPage: React.FC = () => {
   return (
     <main>
       <h1>Public Analysis</h1>
-      <p>Explore public company facts and time-series data.</p>
+      <p>Explore public data points and time-series data.</p>
       <Search onSelect={handleSelect} />
       {selectionRequest && (
         <SelectedViews

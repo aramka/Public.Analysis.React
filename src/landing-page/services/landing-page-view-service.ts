@@ -8,23 +8,23 @@ export const landingPageViewService = {
   async getViewsForSelection(selection: SearchResult): Promise<LandingPageView[]> {
     await new Promise((resolve) => window.setTimeout(resolve, 180));
 
-    const ticker = selection.metadata.ticker;
-    if (!ticker) {
-      throw new Error("Selected result is missing ticker metadata");
+    const entity = selection.metadata.entity;
+    if (!entity) {
+      throw new Error("Selected result is missing entity metadata");
     }
 
     return [
       {
-        id: `${ticker}-income-statement`,
-        type: LandingPageViewType.TickerFacts,
-        ticker,
-        statement: "CashFlow"
+        id: `${entity}-cash-flow`,
+        type: LandingPageViewType.DataPoints,
+        entity,
+        dataPointSet: "CashFlow"
       },
       {
-        id: `${ticker}-revenue-time-series`,
+        id: `${entity}-revenue-time-series`,
         type: LandingPageViewType.TimeSeries,
-        ticker,
-        factName: "PaymentsForRepurchaseOfCommonStock"
+        entity,
+        dataPointName: "PaymentsForRepurchaseOfCommonStock"
       }
     ];
   }

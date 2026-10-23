@@ -9,6 +9,6 @@ export const searchService: SearchService = async (query) => {
     .map((ticker): SearchResult => ({
       id: ticker,
       label: ticker,
-      metadata: { ticker }
+      metadata: { entity: ticker }
     }));
 };

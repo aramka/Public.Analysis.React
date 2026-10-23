@@ -1,4 +1,4 @@
-import {TickerFacts} from "./ticker-facts/ticker-facts"
+import {DataPointsViewer} from "./data-points-viewer/data-points-viewer"
 import {TimeSeries} from "./time-series/time-series"
 import {LandingPage} from "./landing-page/landing-page"
 import { createBrowserRouter } from "react-router";
@@ -12,11 +12,11 @@ const router = createBrowserRouter([
     Component: LandingPage
   },
   {
-    path: "/:ticker/:statement",
-    Component:TickerFacts
+    path: "/:entity/:dataPointSet",
+    Component: DataPointsViewer
   },
   {
-    path: "/:ticker/:dataPointName/time-series",
+    path: "/:entity/:dataPointName/time-series",
     Component:TimeSeries
   }
 ]);

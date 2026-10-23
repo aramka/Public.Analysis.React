@@ -13,7 +13,7 @@ export const endpointUrls = {
     }
     return `${this.publicAnalysisBaseUrl}/search?${searchParams.toString()}`;
   },
-  getStatementTree(statementTreeType:string, statementName:string, entity:string){
-    return `${this.publicAnalysisBaseUrl}/${entity}/${statementName}/facts-tree`
+  getDataPointTree(dataPointSet: string, entity: string) {
+    return `${this.publicAnalysisBaseUrl}/${entity}/${dataPointSet}/facts-tree`
   }
 };

@@ -1,20 +1,20 @@
 export enum LandingPageViewType {
-  TickerFacts = "ticker-facts",
+  DataPoints = "data-points",
   TimeSeries = "time-series"
 }
 
-export interface TickerFactsLandingPageView {
+export interface DataPointsLandingPageView {
   id: string;
-  type: LandingPageViewType.TickerFacts;
-  ticker: string;
-  statement: string;
+  type: LandingPageViewType.DataPoints;
+  entity: string;
+  dataPointSet: string;
 }
 
 export interface TimeSeriesLandingPageView {
   id: string;
   type: LandingPageViewType.TimeSeries;
-  ticker: string;
-  factName: string;
+  entity: string;
+  dataPointName: string;
 }
 
-export type LandingPageView = TickerFactsLandingPageView | TimeSeriesLandingPageView;
+export type LandingPageView = DataPointsLandingPageView | TimeSeriesLandingPageView;

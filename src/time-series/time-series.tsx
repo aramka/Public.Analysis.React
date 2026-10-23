@@ -22,12 +22,12 @@ export interface TimeSeriesDataPoint {
 }
 
 const timeSeriesDataService = {
-  async fetchTimeSeries(ticker: string, factName: string): Promise<ServiceResponse<TimeSeriesDataPoint[]>> {
-    if (!ticker || !factName) {
-      throw new Error("Ticker and fact name are required to load a time series");
+  async fetchTimeSeries(entity: string, dataPointName: string): Promise<ServiceResponse<TimeSeriesDataPoint[]>> {
+    if (!entity || !dataPointName) {
+      throw new Error("Entity and data point name are required to load a time series");
     }
 
-    const path = `/${encodeURIComponent(ticker)}/${encodeURIComponent(factName)}/time-series`;
+    const path = `/${encodeURIComponent(entity)}/${encodeURIComponent(dataPointName)}/time-series`;
     const timeSeriesUrl = `${endpointUrls.publicAnalysisBaseUrl}${path}`;
     const response = await fetch(timeSeriesUrl);
     if (!response.ok) {
@@ -69,20 +69,20 @@ const formatAttribute = (value: unknown) => {
 // 3. PRESENTATION LAYER (UI Component)
 // ==========================================
 interface TimeSeriesProps {
-  ticker?: string;
-  factName?: string;
+  entity?: string;
+  dataPointName?: string;
 }
 
-export const TimeSeries: React.FC<TimeSeriesProps> = ({ ticker, factName }) => {
+export const TimeSeries: React.FC<TimeSeriesProps> = ({ entity, dataPointName }) => {
 
   const location = useLocation();
-  const [routeTicker, routeFactName] = location.pathname.split("/").filter(Boolean);
-  const resolvedTicker = ticker ?? routeTicker ?? "";
-  const resolvedFactName = factName ?? routeFactName ?? "";
+  const [routeEntity, routeDataPointName] = location.pathname.split("/").filter(Boolean);
+  const resolvedEntity = entity ?? routeEntity ?? "";
+  const resolvedDataPointName = dataPointName ?? routeDataPointName ?? "";
 
   // TODO: need a way to handle the error case so that we get backe a strongly typed error and can display the error message in the UI. The current implementation just displays "Error: [object Object]" which is not helpful to the user.
   const { data: serviceResponseData, loading, error } = useAsync(
-    () => timeSeriesDataService.fetchTimeSeries(resolvedTicker, resolvedFactName)
+    () => timeSeriesDataService.fetchTimeSeries(resolvedEntity, resolvedDataPointName)
   );
 
   //TODO: need a way to handle service response data containing validation errors. The current implementation just displays "No data available." which is not helpful to the user.
