@@ -61,14 +61,17 @@ const formatAttribute = (value: unknown) => {
 // 3. PRESENTATION LAYER (UI Component)
 // ==========================================
 interface TimeSeriesProps {
-  path?: string;
+  ticker?: string;
+  factName?: string;
 }
 
-export const TimeSeries: React.FC<TimeSeriesProps> = ({ path: viewPath }) => {
+export const TimeSeries: React.FC<TimeSeriesProps> = ({ ticker, factName }) => {
 
   // let { ticker, dataSetName, dataPointName } = useParams();
   const location = useLocation();
-  const path = viewPath ?? location.pathname;
+  const path = ticker && factName
+    ? `/time-series/${encodeURIComponent(ticker)}/${encodeURIComponent(factName)}`
+    : location.pathname;
 
   // TODO: need a way to handle the error case so that we get backe a strongly typed error and can display the error message in the UI. The current implementation just displays "Error: [object Object]" which is not helpful to the user.
   const { data: serviceResponseData, loading, error } = useAsync(() => timeSeriesDataService.fetchTimeSeries(path));

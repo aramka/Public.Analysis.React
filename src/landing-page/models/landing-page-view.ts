@@ -1,12 +1,20 @@
-export type LandingPageView =
-  | {
-      id: string;
-      type: "ticker-facts";
-      ticker: string;
-      statement: string;
-    }
-  | {
-      id: string;
-      type: "time-series";
-      path: string;
-    };
+export enum LandingPageViewType {
+  TickerFacts = "ticker-facts",
+  TimeSeries = "time-series"
+}
+
+export interface TickerFactsLandingPageView {
+  id: string;
+  type: LandingPageViewType.TickerFacts;
+  ticker: string;
+  statement: string;
+}
+
+export interface TimeSeriesLandingPageView {
+  id: string;
+  type: LandingPageViewType.TimeSeries;
+  ticker: string;
+  factName: string;
+}
+
+export type LandingPageView = TickerFactsLandingPageView | TimeSeriesLandingPageView;

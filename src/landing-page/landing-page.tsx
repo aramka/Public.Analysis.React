@@ -4,7 +4,7 @@ import { Search } from "../search/search";
 import { SearchResult } from "../search/models/search-result";
 import { TickerFacts } from "../ticker-facts/ticker-facts";
 import { TimeSeries } from "../time-series/time-series";
-import { LandingPageView } from "./models/landing-page-view";
+import { LandingPageView, LandingPageViewType } from "./models/landing-page-view";
 import { landingPageViewService } from "./services/landing-page-view-service";
 
 interface SelectedViewsProps {
@@ -20,10 +20,10 @@ const SelectedViews: React.FC<SelectedViewsProps> = ({ selection }) => {
 
   const renderView = (view: LandingPageView) => {
     switch (view.type) {
-      case "ticker-facts":
+      case LandingPageViewType.TickerFacts:
         return <TickerFacts key={view.id} ticker={view.ticker} statement={view.statement} />;
-      case "time-series":
-        return <TimeSeries key={view.id} path={view.path} />;
+      case LandingPageViewType.TimeSeries:
+        return <TimeSeries key={view.id} ticker={view.ticker} factName={view.factName} />;
     }
   };
 

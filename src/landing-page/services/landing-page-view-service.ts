@@ -1,5 +1,8 @@
 import { SearchResult } from "../../search/models/search-result";
-import { LandingPageView } from "../models/landing-page-view";
+import {
+  LandingPageView,
+  LandingPageViewType
+} from "../models/landing-page-view";
 
 export const landingPageViewService = {
   async getViewsForSelection(selection: SearchResult): Promise<LandingPageView[]> {
@@ -13,14 +16,15 @@ export const landingPageViewService = {
     return [
       {
         id: `${ticker}-income-statement`,
-        type: "ticker-facts",
+        type: LandingPageViewType.TickerFacts,
         ticker,
         statement: "CashFlow"
       },
       {
         id: `${ticker}-revenue-time-series`,
-        type: "time-series",
-        path: `/${ticker}/PaymentsForRepurchaseOfCommonStock/time-series`
+        type: LandingPageViewType.TimeSeries,
+        ticker,
+        factName: "PaymentsForRepurchaseOfCommonStock"
       }
     ];
   }
