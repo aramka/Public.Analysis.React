@@ -3,6 +3,7 @@ import {useAsync} from "../hooks/useAsync"
 import {useParams} from "react-router"
 import { endpointUrls } from "../services/endPointUrls";
 import { ServiceResponse } from "../services/models/service-response";
+import { EntityType } from "../models/entity-type";
 
 export enum DataPointVisual {
     TimeSeries="time-series"
@@ -56,8 +57,8 @@ interface ApiDataPointTreeResult {
 }
 
 const dataPointTreeService = {
-    async fetchDataPointTree(entity: string, dataPointSet: string): Promise<ServiceResponse<DataPointTreeResult>> {
-        const response = await fetch(endpointUrls.getDataPointTree(dataPointSet, entity));
+    async fetchDataPointTree(entityType: EntityType, entity: string, dataPointSet: string): Promise<ServiceResponse<DataPointTreeResult>> {
+        const response = await fetch(endpointUrls.getDataPointTree(entityType, entity, dataPointSet));
         if (!response.ok) {
             throw new Error("Failed to fetch data point tree");
         }
@@ -143,9 +144,13 @@ const DataPointTreeBranch: React.FC<{
 interface DataPointsViewerProps {
     entity?: string;
     dataPointSet?: string;
+    entityType?: EntityType;
 }
 
-export const DataPointsViewer: React.FC<DataPointsViewerProps> = (props) =>{
+export const DataPointsViewer: React.FC<DataPointsViewerProps> = ({
+    entityType = EntityType.Ticker,
+    ...props
+}) =>{
     const routeParams = useParams();
     const entity = props.entity ?? routeParams.entity;
     const dataPointSet = props.dataPointSet ?? routeParams.dataPointSet;
@@ -155,7 +160,9 @@ export const DataPointsViewer: React.FC<DataPointsViewerProps> = (props) =>{
     if(!dataPointSet)
         return (<h1>No data point set provided</h1>)
 
-    const {data:serviceResponse, loading:dataPointTreeLoading, error:dataPointTreeError} = useAsync(()=>dataPointTreeService.fetchDataPointTree(entity, dataPointSet))
+    const {data:serviceResponse, loading:dataPointTreeLoading, error:dataPointTreeError} = useAsync(
+        () => dataPointTreeService.fetchDataPointTree(entityType, entity, dataPointSet)
+    )
 
     if (dataPointTreeLoading) {
         return <div style={{ padding: "24px", color: "#666" }}>Loading data point tree...</div>;

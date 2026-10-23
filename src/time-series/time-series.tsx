@@ -12,6 +12,7 @@ import {
 import { endpointUrls } from "../services/endPointUrls";
 import { useAsync } from "../hooks/useAsync";
 import { ServiceResponse } from "../services/models/service-response";
+import { EntityType } from "../models/entity-type";
 // ==========================================
 // 1. DATA LAYER (Types & Mock Service)
 // ==========================================
@@ -22,12 +23,12 @@ export interface TimeSeriesDataPoint {
 }
 
 const timeSeriesDataService = {
-  async fetchTimeSeries(entity: string, dataPointName: string): Promise<ServiceResponse<TimeSeriesDataPoint[]>> {
+  async fetchTimeSeries(entityType: EntityType, entity: string, dataPointName: string): Promise<ServiceResponse<TimeSeriesDataPoint[]>> {
     if (!entity || !dataPointName) {
       throw new Error("Entity and data point name are required to load a time series");
     }
 
-    const path = `/${encodeURIComponent(entity)}/${encodeURIComponent(dataPointName)}/time-series`;
+    const path = `/${entityType}/${encodeURIComponent(entity)}/${encodeURIComponent(dataPointName)}`;
     const timeSeriesUrl = `${endpointUrls.publicAnalysisBaseUrl}${path}`;
     const response = await fetch(timeSeriesUrl);
     if (!response.ok) {
@@ -71,9 +72,14 @@ const formatAttribute = (value: unknown) => {
 interface TimeSeriesProps {
   entity?: string;
   dataPointName?: string;
+  entityType?: EntityType;
 }
 
-export const TimeSeries: React.FC<TimeSeriesProps> = ({ entity, dataPointName }) => {
+export const TimeSeries: React.FC<TimeSeriesProps> = ({
+  entityType = EntityType.Ticker,
+  entity,
+  dataPointName
+}) => {
 
   const location = useLocation();
   const [routeEntity, routeDataPointName] = location.pathname.split("/").filter(Boolean);
@@ -82,7 +88,7 @@ export const TimeSeries: React.FC<TimeSeriesProps> = ({ entity, dataPointName })
 
   // TODO: need a way to handle the error case so that we get backe a strongly typed error and can display the error message in the UI. The current implementation just displays "Error: [object Object]" which is not helpful to the user.
   const { data: serviceResponseData, loading, error } = useAsync(
-    () => timeSeriesDataService.fetchTimeSeries(resolvedEntity, resolvedDataPointName)
+    () => timeSeriesDataService.fetchTimeSeries(entityType, resolvedEntity, resolvedDataPointName)
   );
 
   //TODO: need a way to handle service response data containing validation errors. The current implementation just displays "No data available." which is not helpful to the user.

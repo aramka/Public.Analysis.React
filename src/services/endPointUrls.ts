@@ -1,3 +1,5 @@
+import { EntityType } from "../models/entity-type";
+
 export const endpointUrls = {
   publicAnalysisBaseUrl: import.meta.env.VITE_PUBLIC_ANALYSIS_BASE_URL,
   visuals(visualType:string, dataSetName:string, datapointName:string, entity:string) {
@@ -13,7 +15,7 @@ export const endpointUrls = {
     }
     return `${this.publicAnalysisBaseUrl}/search?${searchParams.toString()}`;
   },
-  getDataPointTree(dataPointSet: string, entity: string) {
-    return `${this.publicAnalysisBaseUrl}/${entity}/${dataPointSet}/facts-tree`
+  getDataPointTree(entityType: EntityType, entity: string, dataPointSet: string) {
+    return `${this.publicAnalysisBaseUrl}/${entityType}/${encodeURIComponent(entity)}/${encodeURIComponent(dataPointSet)}`
   }
 };
