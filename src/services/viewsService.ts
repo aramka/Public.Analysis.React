@@ -1,10 +1,10 @@
-import { SearchResult } from "../../search/models/search-result";
+import { SearchResult } from "../search/models/search-result";
 import {
   LandingPageView,
   LandingPageViewType
-} from "../models/landing-page-view";
+} from "../landing-page/models/landing-page-view";
 
-export const landingPageViewService = {
+export const viewsService = {
   async getViewsForSelection(selection: SearchResult): Promise<LandingPageView[]> {
     await new Promise((resolve) => window.setTimeout(resolve, 180));
 

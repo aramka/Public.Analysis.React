@@ -5,7 +5,7 @@ import { SearchResult } from "../search/models/search-result";
 import { DataPointsViewer } from "../data-points-viewer/data-points-viewer";
 import { TimeSeries } from "../time-series/time-series";
 import { LandingPageView, LandingPageViewType } from "./models/landing-page-view";
-import { landingPageViewService } from "./services/landing-page-view-service";
+import { viewsService } from "../services/viewsService";
 import "./landing-page.css";
 
 interface SelectedViewsProps {
@@ -17,7 +17,7 @@ const SelectedViews: React.FC<SelectedViewsProps> = ({ selection }) => {
     data: views,
     loading,
     error
-  } = useAsync(() => landingPageViewService.getViewsForSelection(selection));
+  } = useAsync(() => viewsService.getViewsForSelection(selection));
 
   const renderView = (view: LandingPageView) => {
     switch (view.type) {
