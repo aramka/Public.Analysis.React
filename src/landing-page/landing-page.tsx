@@ -9,79 +9,43 @@ import { landingPageViewService } from "./services/landing-page-view-service";
 import "./landing-page.css";
 
 interface SelectedViewsProps {
-  selection: SearchResult | null;
-  collapsed: boolean;
-  onToggleSidebar: () => void;
+  selection: SearchResult;
 }
 
-const SelectedViews: React.FC<SelectedViewsProps> = ({
-  selection,
-  collapsed,
-  onToggleSidebar
-}) => {
+const SelectedViews: React.FC<SelectedViewsProps> = ({ selection }) => {
   const {
     data: views,
     loading,
     error
-  } = useAsync(() => selection
-    ? landingPageViewService.getViewsForSelection(selection)
-    : Promise.resolve([]));
+  } = useAsync(() => landingPageViewService.getViewsForSelection(selection));
 
-  const dataPointViews = views?.filter(
-    (view): view is Extract<LandingPageView, { type: LandingPageViewType.DataPoints }> =>
-      view.type === LandingPageViewType.DataPoints
-  );
-  const timeSeriesViews = views?.filter(
-    (view): view is Extract<LandingPageView, { type: LandingPageViewType.TimeSeries }> =>
-      view.type === LandingPageViewType.TimeSeries
-  );
-
-  return (
-    <div className={`landing-page__layout${collapsed ? " landing-page__layout--sidebar-collapsed" : ""}`}>
-      <aside className="landing-page__sidebar" aria-label="Data points">
-        <div className="landing-page__sidebar-header">
-          {!collapsed && <h2>Data points</h2>}
-          <button
-            type="button"
-            className="landing-page__sidebar-toggle"
-            aria-label={collapsed ? "Expand data points panel" : "Collapse data points panel"}
-            aria-expanded={!collapsed}
-            aria-controls="landing-page-data-points"
-            onClick={onToggleSidebar}
-          >
-            {collapsed ? ">" : "<"}
-          </button>
-        </div>
-        <div
-          id="landing-page-data-points"
-          className="landing-page__sidebar-content"
-          hidden={collapsed}
-        >
-          {loading && selection && <p role="status">Loading data points...</p>}
-          {error && <p role="alert">Could not load views: {error.message}</p>}
-          {!selection && <p>Select a result to view its data points.</p>}
-          {dataPointViews?.map((view) => (
-            <DataPointsViewer
-              key={view.id}
-              entity={view.entity}
-              dataPointSet={view.dataPointSet}
-            />
-          ))}
-        </div>
-      </aside>
-      <section className="landing-page__content" aria-label="Selected analysis">
-        {loading && selection && <p role="status">Loading analysis...</p>}
-        {error && <p role="alert">Could not load views: {error.message}</p>}
-        {!selection && <p>Select a result to explore its analysis.</p>}
-        {timeSeriesViews?.map((view) => (
+  const renderView = (view: LandingPageView) => {
+    switch (view.type) {
+      case LandingPageViewType.DataPoints:
+        return (
+          <DataPointsViewer
+            key={view.id}
+            entity={view.entity}
+            dataPointSet={view.dataPointSet}
+          />
+        );
+      case LandingPageViewType.TimeSeries:
+        return (
           <TimeSeries
             key={view.id}
             entity={view.entity}
             dataPointName={view.dataPointName}
           />
-        ))}
-      </section>
-    </div>
+        );
+    }
+  };
+
+  return (
+    <section className="landing-page__content" aria-label="Selected analysis">
+      {loading && <p role="status">Loading analysis...</p>}
+      {error && <p role="alert">Could not load views: {error.message}</p>}
+      {views?.map(renderView)}
+    </section>
   );
 };
 
@@ -91,6 +55,7 @@ export const LandingPage: React.FC = () => {
     requestId: number;
   } | null>(null);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const selectedEntity = selectionRequest?.result.metadata.entity;
 
   const handleSelect = (result: SearchResult) => {
     setSelectionRequest((current) => ({
@@ -102,12 +67,50 @@ export const LandingPage: React.FC = () => {
   return (
     <main>
       <Search onSelect={handleSelect} />
-      <SelectedViews
-        key={selectionRequest?.requestId ?? "empty"}
-        selection={selectionRequest?.result ?? null}
-        collapsed={sidebarCollapsed}
-        onToggleSidebar={() => setSidebarCollapsed((isCollapsed) => !isCollapsed)}
-      />
+      <div className={`landing-page__layout${sidebarCollapsed ? " landing-page__layout--sidebar-collapsed" : ""}`}>
+        <aside className="landing-page__sidebar" aria-label="Data points">
+          <div className="landing-page__sidebar-header">
+            {!sidebarCollapsed && <h2>Data points</h2>}
+            <button
+              type="button"
+              className="landing-page__sidebar-toggle"
+              aria-label={sidebarCollapsed ? "Expand data points panel" : "Collapse data points panel"}
+              aria-expanded={!sidebarCollapsed}
+              aria-controls="landing-page-data-points"
+              onClick={() => setSidebarCollapsed((isCollapsed) => !isCollapsed)}
+            >
+              {sidebarCollapsed ? ">" : "<"}
+            </button>
+          </div>
+          <div
+            id="landing-page-data-points"
+            className="landing-page__sidebar-content"
+            hidden={sidebarCollapsed}
+          >
+            {selectedEntity
+              ? (
+                <DataPointsViewer
+                  key={selectedEntity}
+                  entity={selectedEntity}
+                  dataPointSet="CashFlow"
+                />
+              )
+              : <p>Select a result to view its data points.</p>}
+          </div>
+        </aside>
+        {selectionRequest
+          ? (
+            <SelectedViews
+              key={selectionRequest.requestId}
+              selection={selectionRequest.result}
+            />
+          )
+          : (
+            <section className="landing-page__content" aria-label="Selected analysis">
+              <p>Select a result to explore its analysis.</p>
+            </section>
+          )}
+      </div>
     </main>
   );
 };

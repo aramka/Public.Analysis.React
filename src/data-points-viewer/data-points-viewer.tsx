@@ -153,8 +153,7 @@ export const DataPointsViewer: React.FC<DataPointsViewerProps> = ({
 }) =>{
     const routeParams = useParams();
     const entity = props.entity ?? routeParams.entity;
-    const dataPointSet = props.dataPointSet ?? props.dataPointSet ?? routeParams.dataPointSet ?? null;
-   console.log(dataPointSet)
+    const dataPointSet = props.dataPointSet ?? routeParams.dataPointSet ?? null;
     if(!entity)
         return (<h1>No entity provided</h1>)
 
