@@ -1,7 +1,9 @@
+import { EntityType } from "../../models/entity-type";
+
 export interface SearchResult {
-  id: string;
+  entityType: EntityType;
+  entity: string;
   label: string;
-  metadata: Record<string, string>;
 }
 
 export type SearchService = (query: string, searchType?: string) => Promise<SearchResult[]>;

@@ -144,7 +144,7 @@ export const Search: React.FC<SearchProps> = ({
                 {results.map((result, index) => (
                   <li
                     id={`${resultsId}-option-${index}`}
-                    key={result.id}
+                    key={`${result.entityType}-${result.entity}`}
                     className={`search__option${index === activeIndex ? " search__option--active" : ""}`}
                     role="option"
                     aria-selected={index === activeIndex}

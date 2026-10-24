@@ -25,6 +25,7 @@ const SelectedViews: React.FC<SelectedViewsProps> = ({ selection }) => {
         return (
           <DataPointsViewer
             key={view.id}
+            entityType={view.entityType}
             entity={view.entity}
             dataPointSet={view.dataPointSet}
           />
@@ -33,6 +34,7 @@ const SelectedViews: React.FC<SelectedViewsProps> = ({ selection }) => {
         return (
           <TimeSeries
             key={view.id}
+            entityType={view.entityType}
             entity={view.entity}
             dataPointName={view.dataPointName}
           />
@@ -55,7 +57,7 @@ export const LandingPage: React.FC = () => {
     requestId: number;
   } | null>(null);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const selectedEntity = selectionRequest?.result.metadata.entity;
+  const selectedResult = selectionRequest?.result;
 
   const handleSelect = (result: SearchResult) => {
     setSelectionRequest((current) => ({
@@ -87,11 +89,12 @@ export const LandingPage: React.FC = () => {
             className="landing-page__sidebar-content"
             hidden={sidebarCollapsed}
           >
-            {selectedEntity
+            {selectedResult
               ? (
                 <DataPointsViewer
-                  key={selectedEntity}
-                  entity={selectedEntity}
+                  key={`${selectedResult.entityType}-${selectedResult.entity}`}
+                  entityType={selectedResult.entityType}
+                  entity={selectedResult.entity}
                   dataPointSet="CashFlow"
                 />
               )

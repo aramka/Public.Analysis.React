@@ -1,4 +1,5 @@
 import { SearchResult, SearchService } from "../models/search-result";
+import { EntityType } from "../../models/entity-type";
 
 const tickers = ["AAPL", "AMZN", "GOOGL", "MSFT", "NVDA", "TSLA"];
 
@@ -7,8 +8,8 @@ export const searchService: SearchService = async (query) => {
   return tickers
     .filter((ticker) => ticker.startsWith(prefix))
     .map((ticker): SearchResult => ({
-      id: ticker,
+      entityType: EntityType.Ticker,
+      entity: ticker,
       label: ticker,
-      metadata: { entity: ticker }
     }));
 };
