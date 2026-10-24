@@ -28,7 +28,7 @@ const timeSeriesDataService = {
       throw new Error("Entity and data point name are required to load a time series");
     }
 
-    const path = `/${entityType}/${encodeURIComponent(entity)}/${encodeURIComponent(dataPointName)}`;
+    const path = `/${entityType}/${encodeURIComponent(entity)}/${encodeURIComponent(dataPointName)}/time-series`;
     const timeSeriesUrl = `${endpointUrls.publicAnalysisBaseUrl}${path}`;
     const response = await fetch(timeSeriesUrl);
     if (!response.ok) {

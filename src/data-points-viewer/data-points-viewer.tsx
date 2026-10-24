@@ -57,23 +57,23 @@ interface ApiDataPointTreeResult {
 }
 
 const dataPointTreeService = {
-    async fetchDataPointTree(entityType: EntityType, entity: string, dataPointSet: string): Promise<ServiceResponse<DataPointTreeResult>> {
+    async fetchDataPointTree(entityType: EntityType, entity: string, dataPointSet: string | null): Promise<ServiceResponse<DataPointTreeResult[]>> {
         const response = await fetch(endpointUrls.getDataPointTree(entityType, entity, dataPointSet));
         if (!response.ok) {
-            throw new Error("Failed to fetch data point tree");
+            throw new Error("Failed to fetch data point tree ");
         }
-        const serviceResponse = await response.json() as ServiceResponse<ApiDataPointTreeResult>;
+        const serviceResponse = await response.json() as ServiceResponse<ApiDataPointTreeResult[]>;
         return {
             ...serviceResponse,
             responseData: serviceResponse.responseData
-                ? {
-                    file: serviceResponse.responseData.file,
-                    totalDataPointsCount: serviceResponse.responseData.totalTreeFactsCount,
-                    matchingDataPointsCount: serviceResponse.responseData.matchingFactsCount,
-                    coverage: serviceResponse.responseData.coverage,
-                    description: serviceResponse.responseData.description,
+                ? serviceResponse.responseData.map((treeResult) => ({
+                    file: treeResult.file,
+                    totalDataPointsCount: treeResult.totalTreeFactsCount,
+                    matchingDataPointsCount: treeResult.matchingFactsCount,
+                    coverage: treeResult.coverage,
+                    description: treeResult.description,
                     tree: Object.fromEntries(
-                        Object.entries(serviceResponse.responseData.tree).map(([key, node]) => [
+                        Object.entries(treeResult.tree).map(([key, node]) => [
                             key,
                             {
                                 dataPoint: {
@@ -87,7 +87,7 @@ const dataPointTreeService = {
                             }
                         ])
                     )
-                }
+                }))
                 : null
         };
     }
@@ -143,7 +143,7 @@ const DataPointTreeBranch: React.FC<{
 
 interface DataPointsViewerProps {
     entity?: string;
-    dataPointSet?: string;
+    dataPointSet?: string | null;
     entityType?: EntityType;
 }
 
@@ -153,12 +153,10 @@ export const DataPointsViewer: React.FC<DataPointsViewerProps> = ({
 }) =>{
     const routeParams = useParams();
     const entity = props.entity ?? routeParams.entity;
-    const dataPointSet = props.dataPointSet ?? routeParams.dataPointSet;
-   
+    const dataPointSet = props.dataPointSet ?? props.dataPointSet ?? routeParams.dataPointSet ?? null;
+   console.log(dataPointSet)
     if(!entity)
         return (<h1>No entity provided</h1>)
-    if(!dataPointSet)
-        return (<h1>No data point set provided</h1>)
 
     const {data:serviceResponse, loading:dataPointTreeLoading, error:dataPointTreeError} = useAsync(
         () => dataPointTreeService.fetchDataPointTree(entityType, entity, dataPointSet)
@@ -172,34 +170,38 @@ export const DataPointsViewer: React.FC<DataPointsViewerProps> = ({
         return <div style={{ padding: "24px", color: "#ef4444" }}>Error: {dataPointTreeError.message}</div>;
     }
 
-    if(!serviceResponse || !serviceResponse.responseData || !serviceResponse.responseData.tree || Object.keys(serviceResponse.responseData.tree).length === 0) {
+    if(!serviceResponse?.responseData?.length) {
         return <div style={{ padding: "24px", color: "#666" }}>No data point tree available.</div>;
     }
 
-    const dataPointTreeResponse = serviceResponse.responseData;
-    const parents = Object.entries(dataPointTreeResponse.tree)
-        .filter(([, node]) => !node.dataPoint.parentIds?.some((parentId) => parentId in dataPointTreeResponse.tree));
-
     return (
         <div>
-            <section>
-                <h2>Data Point Tree</h2>
-                {parents.length} parent nodes
-                {serviceResponse && (
-                    <>
-                        <p>{dataPointTreeResponse.description}</p>
+            {serviceResponse.responseData.map((dataPointTreeResponse, resultIndex) => {
+                const parents = Object.entries(dataPointTreeResponse.tree)
+                    .filter(([, node]) => !node.dataPoint.parentIds?.some((parentId) => parentId in dataPointTreeResponse.tree));
+
+                return (
+                    <section key={`${dataPointTreeResponse.file}-${resultIndex}`}>
+                        <h2>{dataPointTreeResponse.description || dataPointTreeResponse.file || "Data Point Tree"}</h2>
+                        {parents.length} parent nodes
                         <p>
                             {dataPointTreeResponse.matchingDataPointsCount} matching data points / {dataPointTreeResponse.totalDataPointsCount} data points
                             ({dataPointTreeResponse.coverage.toFixed(2)}% coverage)
                         </p>
                         <ul>
                             {parents.map(([key, node]) => (
-                                <DataPointTreeBranch entity={entity} key={key} nodeId={node.dataPoint.id} tree={dataPointTreeResponse.tree} label={node.dataPoint.label} />
+                                <DataPointTreeBranch
+                                    entity={entity}
+                                    key={`${resultIndex}-${key}`}
+                                    nodeId={node.dataPoint.id}
+                                    tree={dataPointTreeResponse.tree}
+                                    label={node.dataPoint.label}
+                                />
                             ))}
                         </ul>
-                    </>
-                )}
-            </section>
+                    </section>
+                );
+            })}
         </div>
     );
-}
+};

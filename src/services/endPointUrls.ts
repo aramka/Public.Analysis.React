@@ -15,7 +15,13 @@ export const endpointUrls = {
     }
     return `${this.publicAnalysisBaseUrl}/search?${searchParams.toString()}`;
   },
-  getDataPointTree(entityType: EntityType, entity: string, dataPointSet: string) {
-    return `${this.publicAnalysisBaseUrl}/${entityType}/${encodeURIComponent(entity)}/${encodeURIComponent(dataPointSet)}`
+  getDataPointTree(entityType: EntityType, entity: string, dataPointSet: string | null) {
+    let url = `${this.publicAnalysisBaseUrl}/${entityType}/${encodeURIComponent(entity)}/datapoints`;
+    if (!dataPointSet) {
+      return url;
+    }
+
+    const searchParams = new URLSearchParams({ dataPointSet }); 
+    return `${url}?${searchParams.toString()}`;
   }
 };
