@@ -1,166 +1,22 @@
 import React, { useEffect, useRef, useState } from "react"
 import {useAsync} from "../hooks/useAsync"
 import {useParams} from "react-router"
-import { endpointUrls } from "../services/endPointUrls";
-import { ServiceResponse } from "../services/models/service-response";
 import { EntityType } from "../models/entity-type";
 import { TimeSeries } from "../time-series/time-series";
+import { dataPointTreeService } from "./data-point-tree-service";
+import { DataPointTreeBranch } from "./data-point-tree-branch";
+import {
+    DataPointVisual,
+    DataPointsViewerProps,
+    SelectedDataPointVisual
+} from "./models/data-points-viewer-models";
 import "./data-points-viewer.css";
-
-export enum DataPointVisual {
-    TimeSeries="time-series"
-}
-
-interface DataPointChild {
-    id: string;
-    label: string;
-    order: number;
-}
-
-interface DataPoint {
-    id: string;
-    label: string;
-    parentIds?: string[];
-    children?: DataPointChild[];
-    name: string;
-}
-
-interface ApiDataPoint {
-    id: string;
-    label: string;
-    parentsIds?: string[];
-    children?: DataPointChild[];
-    name: string;
-}
-interface DataPointVisualsModel {
-    dataPoint: DataPoint;
-    visuals: DataPointVisual[]
-}
-
-interface DataPointTreeResult {
-    file: string;
-    totalDataPointsCount: number;
-    matchingDataPointsCount: number;
-    coverage: number;
-    tree: Record<string, DataPointVisualsModel>;
-    description:string
-}
-
-interface ApiDataPointTreeResult {
-    file: string;
-    totalTreeFactsCount: number;
-    matchingFactsCount: number;
-    coverage: number;
-    description: string;
-    tree: Record<string, { factNode: ApiDataPoint; visuals: DataPointVisual[] }>;
-}
-
-const dataPointTreeService = {
-    async fetchDataPointTree(entityType: EntityType, entity: string, dataPointSet: string | null): Promise<ServiceResponse<DataPointTreeResult[]>> {
-        const response = await fetch(endpointUrls.getDataPointTree(entityType, entity, dataPointSet));
-        if (!response.ok) {
-            throw new Error("Failed to fetch data point tree ");
-        }
-        const serviceResponse = await response.json() as ServiceResponse<ApiDataPointTreeResult[]>;
-        return {
-            ...serviceResponse,
-            responseData: serviceResponse.responseData
-                ? serviceResponse.responseData.map((treeResult) => ({
-                    file: treeResult.file,
-                    totalDataPointsCount: treeResult.totalTreeFactsCount,
-                    matchingDataPointsCount: treeResult.matchingFactsCount,
-                    coverage: treeResult.coverage,
-                    description: treeResult.description,
-                    tree: Object.fromEntries(
-                        Object.entries(treeResult.tree).map(([key, node]) => [
-                            key,
-                            {
-                                dataPoint: {
-                                    id: node.factNode.id,
-                                    label: node.factNode.label,
-                                    parentIds: node.factNode.parentsIds,
-                                    children: node.factNode.children,
-                                    name: node.factNode.name
-                                },
-                                visuals: node.visuals
-                            }
-                        ])
-                    )
-                }))
-                : null
-        };
-    }
-};
-
-const DataPointTreeBranch: React.FC<{
-    nodeId: string;
-    tree: Record<string, DataPointVisualsModel>;
-    onOpenVisual: (dataPointName: string, visual: DataPointVisual) => void;
-    label?:string;
-}> = ({ nodeId, tree, onOpenVisual, label }) => {
-    
-    const node = tree[nodeId];
-
-    if (!node ) {
-        return null;
-    }
-
-    const children = [...(node.dataPoint.children ?? [])]
-    .sort((left, right) => left.order - right.order)
-    .map(child=>{ return {id:child.id,order:child.order, childLabel:child.label,uniqueKey:`${child.id}${child.order}${child.label}`} });
-
-    return (
-        <li>
-            <details open>
-                <summary>
-                    <span>{label || node.dataPoint.name}</span>
-                    <span>
-                         {
-                            node.visuals.map((visual) => (
-                                <button
-                                    key={`${node.dataPoint.id}-${visual}`}
-                                    type="button"
-                                    onClick={() => onOpenVisual(node.dataPoint.name, visual)}
-                                >
-                                    {visual}
-                                </button>
-                            ))
-                        }
-                    </span>
-
-                </summary>
-                <ul>
-                    {children.map((child) => tree[child.id]
-                        ? (
-                            <DataPointTreeBranch
-                                key={child.uniqueKey}
-                                nodeId={child.id}
-                                tree={tree}
-                                onOpenVisual={onOpenVisual}
-                                label={child.childLabel}
-                            />
-                        )
-                        : <li key={child.uniqueKey}>Not found in tree: {child.id} | {child.childLabel}</li>)}
-                </ul>
-            </details>
-        </li>
-    );
-};
-
-interface DataPointsViewerProps {
-    entity?: string;
-    dataPointSet?: string | null;
-    entityType?: EntityType;
-}
 
 export const DataPointsViewer: React.FC<DataPointsViewerProps> = ({
     entityType = EntityType.Ticker,
     ...props
 }) =>{
-    const [selectedVisual, setSelectedVisual] = useState<{
-        dataPointName: string;
-        visual: DataPointVisual;
-    } | null>(null);
+    const [selectedVisual, setSelectedVisual] = useState<SelectedDataPointVisual | null>(null);
     const dialogRef = useRef<HTMLDialogElement>(null);
     const routeParams = useParams();
     const entity = props.entity ?? routeParams.entity ?? "";
