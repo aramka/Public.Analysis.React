@@ -51,8 +51,6 @@ export const LandingPage: React.FC = () => {
 
   return (
     <main>
-      <h1>Public Analysis</h1>
-      <p>Explore public data points and time-series data.</p>
       <Search onSelect={handleSelect} />
       {selectionRequest && (
         <SelectedViews

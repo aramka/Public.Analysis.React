@@ -104,8 +104,6 @@ export const Search: React.FC<SearchProps> = ({
       aria-labelledby={`${inputId}-heading`}
       onBlur={handleBlur}
     >
-      <h2 id={`${inputId}-heading`}>Search</h2>
-      <label htmlFor={inputId}>Search</label>
       <div className="search__control">
         <input
           id={inputId}
