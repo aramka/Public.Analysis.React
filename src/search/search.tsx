@@ -19,6 +19,7 @@ export const Search: React.FC<SearchProps> = ({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
   const [isOpen, setIsOpen] = useState(false);
+  const [isFocused, setIsFocused] = useState(false);
   const [activeIndex, setActiveIndex] = useState(-1);
   const [selectedResult, setSelectedResult] = useState<SearchResult | null>(null);
 
@@ -56,6 +57,7 @@ export const Search: React.FC<SearchProps> = ({
     const nextTarget = event.relatedTarget;
     if (!(nextTarget instanceof Node) || !event.currentTarget.contains(nextTarget)) {
       setIsOpen(false);
+      setIsFocused(false);
       setActiveIndex(-1);
     }
   };
@@ -101,7 +103,7 @@ export const Search: React.FC<SearchProps> = ({
   return (
     <section
       className="search"
-      aria-labelledby={`${inputId}-heading`}
+      aria-label="Search"
       onBlur={handleBlur}
     >
       <div className="search__control">
@@ -109,15 +111,20 @@ export const Search: React.FC<SearchProps> = ({
           id={inputId}
           type="search"
           role="combobox"
+          aria-label="Search"
           value={query}
           onChange={(event) => {
             setSelectedResult(null);
             setQuery(event.target.value);
             setIsOpen(true);
           }}
-          onFocus={() => setIsOpen(true)}
+          onFocus={() => {
+            setIsFocused(true);
+            setIsOpen(true);
+          }}
           onKeyDown={handleKeyDown}
           autoComplete="off"
+          placeholder={isFocused ? "" : "Search"}
           aria-autocomplete="list"
           aria-expanded={isOpen && query.trim().length > 0}
           aria-controls={resultsId}
