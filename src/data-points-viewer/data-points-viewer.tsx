@@ -3,7 +3,7 @@ import {useAsync} from "../hooks/useAsync"
 import {useParams} from "react-router"
 import { EntityType } from "../models/entity-type";
 import { TimeSeries } from "../time-series/time-series";
-import { dataPointTreeService } from "./data-point-tree-service";
+import { dataPointsService } from "./dataPointsService";
 import { DataPointTreeBranch } from "./data-point-tree-branch";
 import {
     DataPointVisual,
@@ -24,7 +24,7 @@ export const DataPointsViewer: React.FC<DataPointsViewerProps> = ({
 
     const {data:serviceResponse, loading:dataPointTreeLoading, error:dataPointTreeError} = useAsync(
         () => entity
-            ? dataPointTreeService.fetchDataPointTree(entityType, entity, dataPointSet)
+            ? dataPointsService.fetchDataPointTree(entityType, entity, dataPointSet)
             : Promise.resolve({ responseData: null, validationErrors: [] })
     )
 

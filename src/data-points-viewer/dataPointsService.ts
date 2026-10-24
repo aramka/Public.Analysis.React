@@ -6,7 +6,7 @@ import {
   DataPointTreeResult
 } from "./models/data-points-viewer-models";
 
-export const dataPointTreeService = {
+export const dataPointsService = {
   async fetchDataPointTree(
     entityType: EntityType,
     entity: string,
