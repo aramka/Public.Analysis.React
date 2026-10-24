@@ -1,9 +1,11 @@
-import React from "react"
+import React, { useEffect, useRef, useState } from "react"
 import {useAsync} from "../hooks/useAsync"
 import {useParams} from "react-router"
 import { endpointUrls } from "../services/endPointUrls";
 import { ServiceResponse } from "../services/models/service-response";
 import { EntityType } from "../models/entity-type";
+import { TimeSeries } from "../time-series/time-series";
+import "./data-points-viewer.css";
 
 export enum DataPointVisual {
     TimeSeries="time-series"
@@ -30,12 +32,9 @@ interface ApiDataPoint {
     children?: DataPointChild[];
     name: string;
 }
-enum DataPointVisualType {
-    TimeSeries="time-series"
-}
 interface DataPointVisualsModel {
     dataPoint: DataPoint;
-    visuals: DataPointVisualType[]
+    visuals: DataPointVisual[]
 }
 
 interface DataPointTreeResult {
@@ -53,7 +52,7 @@ interface ApiDataPointTreeResult {
     matchingFactsCount: number;
     coverage: number;
     description: string;
-    tree: Record<string, { factNode: ApiDataPoint; visuals: DataPointVisualType[] }>;
+    tree: Record<string, { factNode: ApiDataPoint; visuals: DataPointVisual[] }>;
 }
 
 const dataPointTreeService = {
@@ -94,11 +93,11 @@ const dataPointTreeService = {
 };
 
 const DataPointTreeBranch: React.FC<{
-    entity: string;
     nodeId: string;
     tree: Record<string, DataPointVisualsModel>;
+    onOpenVisual: (dataPointName: string, visual: DataPointVisual) => void;
     label?:string;
-}> = ({ entity, nodeId, tree, label }) => {
+}> = ({ nodeId, tree, onOpenVisual, label }) => {
     
     const node = tree[nodeId];
 
@@ -117,23 +116,30 @@ const DataPointTreeBranch: React.FC<{
                     <span>{label || node.dataPoint.name}</span>
                     <span>
                          {
-                            node.visuals.map((visual)=>
-                                    {
-                                        
-                                        const path:string[] = [entity, node.dataPoint.name ?? "",visual]
-                                        const key:string=`${path.join("-")}`
-                                        const visualComponentRoute=`/${path.join("/")}`
-                                        return <a key={key} href={visualComponentRoute}>{visual}</a>
-                                            
-                                    }
-                                )
+                            node.visuals.map((visual) => (
+                                <button
+                                    key={`${node.dataPoint.id}-${visual}`}
+                                    type="button"
+                                    onClick={() => onOpenVisual(node.dataPoint.name, visual)}
+                                >
+                                    {visual}
+                                </button>
+                            ))
                         }
                     </span>
 
                 </summary>
                 <ul>
                     {children.map((child) => tree[child.id]
-                        ? <DataPointTreeBranch entity={entity} key={child.uniqueKey} nodeId={child.id} tree={tree} label={child.childLabel} />
+                        ? (
+                            <DataPointTreeBranch
+                                key={child.uniqueKey}
+                                nodeId={child.id}
+                                tree={tree}
+                                onOpenVisual={onOpenVisual}
+                                label={child.childLabel}
+                            />
+                        )
                         : <li key={child.uniqueKey}>Not found in tree: {child.id} | {child.childLabel}</li>)}
                 </ul>
             </details>
@@ -151,15 +157,35 @@ export const DataPointsViewer: React.FC<DataPointsViewerProps> = ({
     entityType = EntityType.Ticker,
     ...props
 }) =>{
+    const [selectedVisual, setSelectedVisual] = useState<{
+        dataPointName: string;
+        visual: DataPointVisual;
+    } | null>(null);
+    const dialogRef = useRef<HTMLDialogElement>(null);
     const routeParams = useParams();
-    const entity = props.entity ?? routeParams.entity;
+    const entity = props.entity ?? routeParams.entity ?? "";
     const dataPointSet = props.dataPointSet ?? routeParams.dataPointSet ?? null;
-    if(!entity)
-        return (<h1>No entity provided</h1>)
 
     const {data:serviceResponse, loading:dataPointTreeLoading, error:dataPointTreeError} = useAsync(
-        () => dataPointTreeService.fetchDataPointTree(entityType, entity, dataPointSet)
+        () => entity
+            ? dataPointTreeService.fetchDataPointTree(entityType, entity, dataPointSet)
+            : Promise.resolve({ responseData: null, validationErrors: [] })
     )
+
+    useEffect(() => {
+        const dialog = dialogRef.current;
+        if (!dialog || !selectedVisual) {
+            return;
+        }
+
+        dialog.showModal();
+        return () => {
+            dialog.close();
+        };
+    }, [selectedVisual]);
+
+    if(!entity)
+        return (<h1>No entity provided</h1>)
 
     if (dataPointTreeLoading) {
         return <div style={{ padding: "24px", color: "#666" }}>Loading data point tree...</div>;
@@ -190,10 +216,10 @@ export const DataPointsViewer: React.FC<DataPointsViewerProps> = ({
                         <ul>
                             {parents.map(([key, node]) => (
                                 <DataPointTreeBranch
-                                    entity={entity}
                                     key={`${resultIndex}-${key}`}
                                     nodeId={node.dataPoint.id}
                                     tree={dataPointTreeResponse.tree}
+                                    onOpenVisual={(dataPointName, visual) => setSelectedVisual({ dataPointName, visual })}
                                     label={node.dataPoint.label}
                                 />
                             ))}
@@ -201,6 +227,38 @@ export const DataPointsViewer: React.FC<DataPointsViewerProps> = ({
                     </section>
                 );
             })}
+            {selectedVisual && (
+                <dialog
+                    ref={dialogRef}
+                    className="data-points-viewer__dialog"
+                    aria-labelledby="data-points-viewer-dialog-title"
+                    onCancel={(event) => {
+                        event.preventDefault();
+                        setSelectedVisual(null);
+                    }}
+                    onClick={(event) => {
+                        if (event.target === dialogRef.current) {
+                            setSelectedVisual(null);
+                        }
+                    }}
+                >
+                    <header className="data-points-viewer__dialog-header">
+                        <h2 id="data-points-viewer-dialog-title">
+                            {selectedVisual.dataPointName} — {selectedVisual.visual}
+                        </h2>
+                        <button type="button" onClick={() => setSelectedVisual(null)}>
+                            Close
+                        </button>
+                    </header>
+                    {selectedVisual.visual === DataPointVisual.TimeSeries && (
+                        <TimeSeries
+                            entity={entity}
+                            dataPointName={selectedVisual.dataPointName}
+                            entityType={entityType}
+                        />
+                    )}
+                </dialog>
+            )}
         </div>
     );
 };

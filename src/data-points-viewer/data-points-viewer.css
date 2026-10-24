@@ -1,0 +1,27 @@
+.data-points-viewer__dialog {
+  box-sizing: border-box;
+  width: 100vw;
+  max-width: none;
+  height: 100vh;
+  max-height: none;
+  margin: 0;
+  padding: 1rem;
+  overflow: auto;
+  border: 0;
+}
+
+.data-points-viewer__dialog::backdrop {
+  background: rgb(0 0 0 / 55%);
+}
+
+.data-points-viewer__dialog-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.data-points-viewer__dialog-header h2 {
+  margin: 0;
+}
