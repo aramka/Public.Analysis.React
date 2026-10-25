@@ -9,7 +9,6 @@ export interface DataPointsView {
   id: string;
   viewType: ViewType.DataPoints;
   entityType: EntityType;
-  entity: string;
   dataPointSet: string;
 }
 
@@ -17,7 +16,6 @@ export interface TimeSeriesView {
   id: string;
   viewType: ViewType.TimeSeries;
   entityType: EntityType;
-  entity: string;
   dataPointName: string;
 }
 

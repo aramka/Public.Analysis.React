@@ -13,14 +13,12 @@ const viewsByEntityType: Record<string, Record<string, View>> = {
       id: `${ViewType.DataPoints}-${EntityType.Ticker}-CashFlow`,
       viewType: ViewType.DataPoints,
       entityType: EntityType.Ticker,
-      entity: "",
       dataPointSet: "CashFlow"
     },
     [`${ViewType.TimeSeries}-${EntityType.Ticker}-PaymentsForRepurchaseOfCommonStock`]: {
       id: `${ViewType.TimeSeries}-${EntityType.Ticker}-PaymentsForRepurchaseOfCommonStock`,
       viewType: ViewType.TimeSeries,
       entityType: EntityType.Ticker,
-      entity: "",
       dataPointName: "PaymentsForRepurchaseOfCommonStock"
     }
   }
@@ -33,7 +31,6 @@ export const viewsService = {
     const views = viewsByEntity[selection.entity] ?? viewsByEntityType[selection.entityType];
     return Object.values(views ?? {}).map((view) => ({
       ...view,
-      entity: selection.entity,
       entityType: selection.entityType
     }));
   }

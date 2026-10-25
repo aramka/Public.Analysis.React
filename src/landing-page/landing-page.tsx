@@ -26,7 +26,7 @@ const SelectedViews: React.FC<SelectedViewsProps> = ({ selection }) => {
           <DataPointsViewer
             key={view.id}
             entityType={view.entityType}
-            entity={view.entity}
+            entity={selection.entity}
             dataPointSet={view.dataPointSet}
           />
         );
@@ -35,7 +35,7 @@ const SelectedViews: React.FC<SelectedViewsProps> = ({ selection }) => {
           <TimeSeries
             key={view.id}
             entityType={view.entityType}
-            entity={view.entity}
+            entity={selection.entity}
             dataPointName={view.dataPointName}
           />
         );
