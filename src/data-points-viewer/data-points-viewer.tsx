@@ -4,6 +4,7 @@ import {useParams} from "react-router"
 import { EntityType } from "../models/entity-type";
 import { TimeSeries } from "../time-series/time-series";
 import { dataPointsService } from "./dataPointsService";
+import { viewsService } from "../services/viewsService/viewsService";
 import { DataPointTreeBranch } from "./data-point-tree-branch";
 import {
     DataPointVisual,
@@ -14,13 +15,34 @@ import "./data-points-viewer.css";
 
 export const DataPointsViewer: React.FC<DataPointsViewerProps> = ({
     entityType = EntityType.Ticker,
-    ...props
+    onViewsChanged,
+    entity: entityProp,
+    dataPointSet: dataPointSetProp
 }) =>{
     const [selectedVisual, setSelectedVisual] = useState<SelectedDataPointVisual | null>(null);
+    const [saveMessage, setSaveMessage] = useState("");
     const dialogRef = useRef<HTMLDialogElement>(null);
     const routeParams = useParams();
-    const entity = props.entity ?? routeParams.entity ?? "";
-    const dataPointSet = props.dataPointSet ?? routeParams.dataPointSet ?? null;
+    const entity = entityProp ?? routeParams.entity ?? "";
+    const dataPointSet = dataPointSetProp ?? routeParams.dataPointSet ?? null;
+
+    const addToEntityView = () => {
+        if (!selectedVisual) {
+            return;
+        }
+        viewsService.addTimeSeriesViewToEntity(entity, entityType, selectedVisual.dataPointName);
+        setSaveMessage(`Added to ${entity} view.`);
+        onViewsChanged?.();
+    };
+
+    const addToTickerView = () => {
+        if (!selectedVisual) {
+            return;
+        }
+        viewsService.addTimeSeriesViewToEntityType(EntityType.Ticker, selectedVisual.dataPointName);
+        setSaveMessage("Added to Ticker view.");
+        onViewsChanged?.();
+    };
 
     const {data:serviceResponse, loading:dataPointTreeLoading, error:dataPointTreeError} = useAsync(
         () => entity
@@ -106,6 +128,15 @@ export const DataPointsViewer: React.FC<DataPointsViewerProps> = ({
                             Close
                         </button>
                     </header>
+                    <div className="data-points-viewer__dialog-actions">
+                        <button type="button" onClick={addToEntityView}>
+                            Add To {entity} View
+                        </button>
+                        <button type="button" onClick={addToTickerView}>
+                            Add to Ticker View
+                        </button>
+                        {saveMessage && <p role="status">{saveMessage}</p>}
+                    </div>
                     {selectedVisual.visual === DataPointVisual.TimeSeries && (
                         <TimeSeries
                             entity={entity}

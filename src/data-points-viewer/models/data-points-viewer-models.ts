@@ -53,6 +53,7 @@ export interface DataPointsViewerProps {
   entity?: string;
   dataPointSet?: string | null;
   entityType?: EntityType;
+  onViewsChanged?: () => void;
 }
 
 export interface SelectedDataPointVisual {

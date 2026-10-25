@@ -10,9 +10,10 @@ import "./landing-page.css";
 
 interface SelectedViewsProps {
   selection: SearchResult;
+  onViewsChanged: () => void;
 }
 
-const SelectedViews: React.FC<SelectedViewsProps> = ({ selection }) => {
+const SelectedViews: React.FC<SelectedViewsProps> = ({ selection, onViewsChanged }) => {
   const {
     data: views,
     loading,
@@ -28,6 +29,7 @@ const SelectedViews: React.FC<SelectedViewsProps> = ({ selection }) => {
             entityType={view.entityType}
             entity={selection.entity}
             dataPointSet={view.dataPointSet}
+            onViewsChanged={onViewsChanged}
           />
         );
       case ViewType.TimeSeries:
@@ -57,6 +59,7 @@ export const LandingPage: React.FC = () => {
     requestId: number;
   } | null>(null);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [viewsRevision, setViewsRevision] = useState(0);
   const selectedResult = selectionRequest?.result;
 
   const handleSelect = (result: SearchResult) => {
@@ -96,6 +99,7 @@ export const LandingPage: React.FC = () => {
                   entityType={selectedResult.entityType}
                   entity={selectedResult.entity}
                   dataPointSet="CashFlow"
+                  onViewsChanged={() => setViewsRevision((revision) => revision + 1)}
                 />
               )
               : <p>Select a result to view its data points.</p>}
@@ -104,8 +108,9 @@ export const LandingPage: React.FC = () => {
         {selectionRequest
           ? (
             <SelectedViews
-              key={selectionRequest.requestId}
+              key={`${selectionRequest.requestId}-${viewsRevision}`}
               selection={selectionRequest.result}
+              onViewsChanged={() => setViewsRevision((revision) => revision + 1)}
             />
           )
           : (
