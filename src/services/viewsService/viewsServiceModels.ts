@@ -1,24 +1,24 @@
 import { EntityType } from "../../models/entity-type";
 
-export enum LandingPageViewType {
+export enum ViewType {
   DataPoints = "data-points",
   TimeSeries = "time-series"
 }
 
-export interface DataPointsLandingPageView {
+export interface DataPointsView {
   id: string;
-  type: LandingPageViewType.DataPoints;
+  type: ViewType.DataPoints;
   entityType: EntityType;
   entity: string;
   dataPointSet: string;
 }
 
-export interface TimeSeriesLandingPageView {
+export interface TimeSeriesView {
   id: string;
-  type: LandingPageViewType.TimeSeries;
+  viewType: ViewType.TimeSeries;
   entityType: EntityType;
   entity: string;
   dataPointName: string;
 }
 
-export type LandingPageView = DataPointsLandingPageView | TimeSeriesLandingPageView;
+export type View = DataPointsView | TimeSeriesView;
