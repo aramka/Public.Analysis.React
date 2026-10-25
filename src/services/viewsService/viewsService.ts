@@ -13,7 +13,7 @@ export const viewsService = {
     return [
       {
         id: `${entity}-cash-flow`,
-        type: ViewType.DataPoints,
+        viewType: ViewType.DataPoints,
         entityType,
         entity,
         dataPointSet: "CashFlow"

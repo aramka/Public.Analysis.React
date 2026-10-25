@@ -7,7 +7,7 @@ export enum ViewType {
 
 export interface DataPointsView {
   id: string;
-  type: ViewType.DataPoints;
+  viewType: ViewType.DataPoints;
   entityType: EntityType;
   entity: string;
   dataPointSet: string;

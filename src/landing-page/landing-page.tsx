@@ -20,7 +20,7 @@ const SelectedViews: React.FC<SelectedViewsProps> = ({ selection }) => {
   } = useAsync(() => viewsService.getViewsForSelection(selection));
 
   const renderView = (view: View) => {
-    switch (view.type) {
+    switch (view.viewType) {
       case ViewType.DataPoints:
         return (
           <DataPointsViewer
