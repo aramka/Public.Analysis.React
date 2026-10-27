@@ -117,7 +117,7 @@ export const TimeSeries: React.FC<TimeSeriesProps> = ({
       boxSizing: "border-box"
     }}>
       <h3 style={{ margin: "0 0 16px 0", fontFamily: "sans-serif", color: "#1f2937" }}>
-        {serviceResponseData.label?.trim() || dataPointName || resolvedDataPointName}
+        {resolvedEntity} {serviceResponseData.label?.trim() || dataPointName || resolvedDataPointName}
       </h3>
       <div style={{ width: "100%", height: 300 }}>
         <ResponsiveContainer width="100%" height="100%">

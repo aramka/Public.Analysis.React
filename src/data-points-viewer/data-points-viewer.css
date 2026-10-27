@@ -14,14 +14,7 @@
   background: rgb(0 0 0 / 55%);
 }
 
-.data-points-viewer__dialog-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  margin-bottom: 1rem;
-}
-
-.data-points-viewer__dialog-header h2 {
-  margin: 0;
+.data-points-viewer__dialog-close {
+  display: block;
+  margin: 0 0 1rem auto;
 }

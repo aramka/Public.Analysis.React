@@ -90,7 +90,7 @@ export const DataPointsViewer: React.FC<DataPointsViewerProps> = ({
                 <dialog
                     ref={dialogRef}
                     className="data-points-viewer__dialog"
-                    aria-labelledby="data-points-viewer-dialog-title"
+                    aria-label="Data point visualization"
                     onCancel={(event) => {
                         event.preventDefault();
                         setSelectedVisual(null);
@@ -101,14 +101,13 @@ export const DataPointsViewer: React.FC<DataPointsViewerProps> = ({
                         }
                     }}
                 >
-                    <header className="data-points-viewer__dialog-header">
-                        <h2 id="data-points-viewer-dialog-title">
-                            {selectedVisual.dataPointName} — {selectedVisual.visual}
-                        </h2>
-                        <button type="button" onClick={() => setSelectedVisual(null)}>
-                            Close
-                        </button>
-                    </header>
+                    <button
+                        type="button"
+                        className="data-points-viewer__dialog-close"
+                        onClick={() => setSelectedVisual(null)}
+                    >
+                        Close
+                    </button>
                     <ViewActions
                         entity={entity}
                         entityType={entityType}

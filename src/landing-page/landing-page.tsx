@@ -27,7 +27,7 @@ export const LandingPage: React.FC = () => {
       <div className={`landing-page__layout${sidebarCollapsed ? " landing-page__layout--sidebar-collapsed" : ""}`}>
         <aside className="landing-page__sidebar" aria-label="Data points">
           <div className="landing-page__sidebar-header">
-            {!sidebarCollapsed && <h2>Data points</h2>}
+            {!sidebarCollapsed && <h2>{selectedResult ? `${selectedResult.entity} Data Points` : "Data Points"}</h2>}
             <button
               type="button"
               className="landing-page__sidebar-toggle"
