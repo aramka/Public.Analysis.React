@@ -51,6 +51,7 @@ export const LandingPageViews: React.FC<LandingPageViewsProps> = ({ selection, o
           <ViewActions
             entity={selection.entity}
             view={view}
+            showAddToEntityView={false}
             showAddToTickerView={false}
             showRemoveFromTickerView={false}
             onViewsChanged={onViewsChanged}
