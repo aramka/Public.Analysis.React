@@ -22,8 +22,12 @@ export interface TimeSeriesDataPoint {
   [attribute: string]: unknown;
 }
 
+interface TimeSeriesResponse extends ServiceResponse<TimeSeriesDataPoint[]> {
+  label?: string;
+}
+
 const timeSeriesDataService = {
-  async fetchTimeSeries(entityType: EntityType, entity: string, dataPointName: string): Promise<ServiceResponse<TimeSeriesDataPoint[]>> {
+  async fetchTimeSeries(entityType: EntityType, entity: string, dataPointName: string): Promise<TimeSeriesResponse> {
     if (!entity || !dataPointName) {
       throw new Error("Entity and data point name are required to load a time series");
     }
@@ -34,7 +38,7 @@ const timeSeriesDataService = {
     if (!response.ok) {
       throw new Error(`Failed to fetch time series: ${response.status}`);
     }
-    const data = await response.json();
+    const data = await response.json() as TimeSeriesResponse;
     return data;
   }
 };
@@ -113,7 +117,7 @@ export const TimeSeries: React.FC<TimeSeriesProps> = ({
       boxSizing: "border-box"
     }}>
       <h3 style={{ margin: "0 0 16px 0", fontFamily: "sans-serif", color: "#1f2937" }}>
-        System Throughput
+        {serviceResponseData.label?.trim() || dataPointName || resolvedDataPointName}
       </h3>
       <div style={{ width: "100%", height: 300 }}>
         <ResponsiveContainer width="100%" height="100%">

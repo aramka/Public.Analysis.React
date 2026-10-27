@@ -38,6 +38,23 @@ const createTimeSeriesView = (
   };
 };
 
+const addViewToEntity = (entity: string, view: View): void => {
+  const entityViews = viewsByEntity[entity] ??= {};
+  entityViews[view.id] = view;
+};
+
+const removeViewFromEntity = (entity: string, viewId: string): void => {
+  const entityViews = viewsByEntity[entity];
+  if (!entityViews) {
+    return;
+  }
+
+  delete entityViews[viewId];
+  if (Object.keys(entityViews).length === 0) {
+    delete viewsByEntity[entity];
+  }
+};
+
 export const viewsService = {
   async getViewsForSelection(selection: SearchResult): Promise<View[]> {
     await new Promise((resolve) => window.setTimeout(resolve, 180));
@@ -46,15 +63,35 @@ export const viewsService = {
     return Object.values(views ?? {});
   },
 
+  addViewToEntity(entity: string, view: View): void {
+    addViewToEntity(entity, view);
+  },
+
+  removeViewFromEntity(entity: string, viewId: string): void {
+    removeViewFromEntity(entity, viewId);
+  },
+
   addTimeSeriesViewToEntity(entity: string, entityType: EntityType, dataPointName: string): void {
-    const view = createTimeSeriesView(entityType, dataPointName);
-    const entityViews = viewsByEntity[entity] ??= {};
-    entityViews[view.id] = view;
+    addViewToEntity(entity, createTimeSeriesView(entityType, dataPointName));
+  },
+
+  removeTimeSeriesViewFromEntity(entity: string, entityType: EntityType, dataPointName: string): void {
+    removeViewFromEntity(entity, createTimeSeriesView(entityType, dataPointName).id);
   },
 
   addTimeSeriesViewToEntityType(entityType: EntityType, dataPointName: string): void {
     const view = createTimeSeriesView(entityType, dataPointName);
     const entityTypeViews = viewsByEntityType[entityType] ??= {};
     entityTypeViews[view.id] = view;
+  },
+
+  removeTimeSeriesViewFromEntityType(entityType: EntityType, dataPointName: string): void {
+    const viewId = createTimeSeriesView(entityType, dataPointName).id;
+    const entityTypeViews = viewsByEntityType[entityType];
+    if (!entityTypeViews) {
+      return;
+    }
+
+    delete entityTypeViews[viewId];
   }
 };

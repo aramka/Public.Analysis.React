@@ -4,7 +4,7 @@ import {useParams} from "react-router"
 import { EntityType } from "../models/entity-type";
 import { TimeSeries } from "../time-series/time-series";
 import { dataPointsService } from "./dataPointsService";
-import { ViewActions } from "./view-actions";
+import { ViewActions } from "../view-actions/view-actions";
 import { DataPointTreeBranch } from "./data-point-tree-branch";
 import {
     DataPointVisual,
@@ -113,6 +113,8 @@ export const DataPointsViewer: React.FC<DataPointsViewerProps> = ({
                         entity={entity}
                         entityType={entityType}
                         dataPointName={selectedVisual.dataPointName}
+                        showRemoveFromEntityView={false}
+                        showRemoveFromTickerView={false}
                         onViewsChanged={onViewsChanged}
                     />
                     {selectedVisual.visual === DataPointVisual.TimeSeries && (

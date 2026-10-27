@@ -1,57 +1,9 @@
 import React, { useState } from "react";
-import { useAsync } from "../hooks/useAsync";
 import { Search } from "../search/search";
 import { SearchResult } from "../search/models/search-result";
 import { DataPointsViewer } from "../data-points-viewer/data-points-viewer";
-import { TimeSeries } from "../time-series/time-series";
-import { View, ViewType } from "../services/viewsService/viewsServiceModels";
-import { viewsService } from "../services/viewsService/viewsService";
+import { LandingPageViews } from "./landing-page-views";
 import "./landing-page.css";
-
-interface SelectedViewsProps {
-  selection: SearchResult;
-  onViewsChanged: () => void;
-}
-
-const SelectedViews: React.FC<SelectedViewsProps> = ({ selection, onViewsChanged }) => {
-  const {
-    data: views,
-    loading,
-    error
-  } = useAsync(() => viewsService.getViewsForSelection(selection));
-
-  const renderView = (view: View) => {
-    switch (view.viewType) {
-      case ViewType.DataPoints:
-        return (
-          <DataPointsViewer
-            key={view.id}
-            entityType={view.entityType}
-            entity={selection.entity}
-            dataPointSet={view.dataPointSet}
-            onViewsChanged={onViewsChanged}
-          />
-        );
-      case ViewType.TimeSeries:
-        return (
-          <TimeSeries
-            key={view.id}
-            entityType={view.entityType}
-            entity={selection.entity}
-            dataPointName={view.dataPointName}
-          />
-        );
-    }
-  };
-
-  return (
-    <section className="landing-page__content" aria-label="Selected analysis">
-      {loading && <p role="status">Loading analysis...</p>}
-      {error && <p role="alert">Could not load views: {error.message}</p>}
-      {views?.map(renderView)}
-    </section>
-  );
-};
 
 export const LandingPage: React.FC = () => {
   const [selectionRequest, setSelectionRequest] = useState<{
@@ -107,7 +59,7 @@ export const LandingPage: React.FC = () => {
         </aside>
         {selectionRequest
           ? (
-            <SelectedViews
+            <LandingPageViews
               key={`${selectionRequest.requestId}-${viewsRevision}`}
               selection={selectionRequest.result}
               onViewsChanged={() => setViewsRevision((revision) => revision + 1)}
