@@ -41,12 +41,22 @@ export const LandingPageViews: React.FC<LandingPageViewsProps> = ({ selection, o
     }
   };
 
+  const getViewTitle = (selection: SearchResult, view: View): string => {
+    switch (view.viewType) {
+      case ViewType.DataPoints:
+        return `${selection.entity} ${view.dataPointSet} Data Points`;
+      case ViewType.TimeSeries:
+        return `${selection.entity} ${view.dataPointName} Time Series`;
+    }
+  };
+
   return (
     <section className="landing-page__content" aria-label="Selected analysis">
       {loading && <p role="status">Loading analysis...</p>}
       {error && <p role="alert">Could not load views: {error.message}</p>}
       {views?.map((view) => (
-        <div key={view.id}>
+        <details key={view.id} className="landing-page__view" open>
+          <summary>{getViewTitle(selection, view)}</summary>
           {renderView(view)}
           <ViewActions
             entity={selection.entity}
@@ -56,7 +66,7 @@ export const LandingPageViews: React.FC<LandingPageViewsProps> = ({ selection, o
             showRemoveFromTickerView={false}
             onViewsChanged={onViewsChanged}
           />
-        </div>
+        </details>
       ))}
     </section>
   );
