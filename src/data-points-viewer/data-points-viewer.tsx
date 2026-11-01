@@ -65,25 +65,31 @@ export const DataPointsViewer: React.FC<DataPointsViewerProps> = ({
                     .filter(([, node]) => !node.dataPoint.parentIds?.some((parentId) => parentId in dataPointTreeResponse.tree));
 
                 return (
-                    <section key={`${dataPointTreeResponse.file}-${resultIndex}`}>
-                        <h2>{dataPointTreeResponse.description || dataPointTreeResponse.file || "Data Point Tree"}</h2>
-                        {parents.length} parent nodes
-                        <p>
-                            {dataPointTreeResponse.matchingDataPointsCount} matching data points / {dataPointTreeResponse.totalDataPointsCount} data points
-                            ({dataPointTreeResponse.coverage.toFixed(2)}% coverage)
-                        </p>
-                        <ul>
-                            {parents.map(([key, node]) => (
-                                <DataPointTreeBranch
-                                    key={`${resultIndex}-${key}`}
-                                    nodeId={node.dataPoint.id}
-                                    tree={dataPointTreeResponse.tree}
-                                    onOpenVisual={(dataPointName, visual) => setSelectedVisual({ dataPointName, visual })}
-                                    label={node.dataPoint.label}
-                                />
-                            ))}
-                        </ul>
-                    </section>
+                    <details key={`${dataPointTreeResponse.file}-${resultIndex}`} open>
+                        <summary className="data-points-viewer__tree-toggle">
+                            <span className="data-points-viewer__tree-summary" role="heading" aria-level={2}>
+                                {dataPointTreeResponse.description || dataPointTreeResponse.file || "Data Point Tree"}
+                            </span>
+                        </summary>
+                        <section>
+                            {parents.length} parent nodes
+                            <p>
+                                {dataPointTreeResponse.matchingDataPointsCount} matching data points / {dataPointTreeResponse.totalDataPointsCount} data points
+                                ({dataPointTreeResponse.coverage.toFixed(2)}% coverage)
+                            </p>
+                            <ul>
+                                {parents.map(([key, node]) => (
+                                    <DataPointTreeBranch
+                                        key={`${resultIndex}-${key}`}
+                                        nodeId={node.dataPoint.id}
+                                        tree={dataPointTreeResponse.tree}
+                                        onOpenVisual={(dataPointName, visual) => setSelectedVisual({ dataPointName, visual })}
+                                        label={node.dataPoint.label}
+                                    />
+                                ))}
+                            </ul>
+                        </section>
+                    </details>
                 );
             })}
             {selectedVisual && (

@@ -1,3 +1,38 @@
+.data-points-viewer__tree-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin-block: 0.83em;
+  cursor: pointer;
+  list-style: none;
+}
+
+.data-points-viewer__tree-toggle::-webkit-details-marker {
+  display: none;
+}
+
+.data-points-viewer__tree-toggle::before {
+  flex: 0 0 auto;
+  width: 0;
+  height: 0;
+  border-top: 0.35em solid transparent;
+  border-bottom: 0.35em solid transparent;
+  border-left: 0.45em solid currentColor;
+  content: "";
+  transition: transform 0.15s ease;
+}
+
+details[open] > .data-points-viewer__tree-toggle::before {
+  transform: rotate(90deg);
+}
+
+.data-points-viewer__tree-summary {
+  display: block;
+  margin: 0;
+  font-size: 1.5em;
+  font-weight: bold;
+}
+
 .data-points-viewer__dialog {
   box-sizing: border-box;
   width: 100vw;
