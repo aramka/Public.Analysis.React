@@ -50,7 +50,6 @@ export const LandingPage: React.FC = () => {
                   key={`${selectedResult.entityType}-${selectedResult.entity}`}
                   entityType={selectedResult.entityType}
                   entity={selectedResult.entity}
-                  dataPointSet="CashFlow"
                   onViewsChanged={() => setViewsRevision((revision) => revision + 1)}
                 />
               )

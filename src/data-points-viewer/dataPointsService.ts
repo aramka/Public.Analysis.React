@@ -32,7 +32,7 @@ export const dataPointsService = {
               key,
               {
                 dataPoint: {
-                  id: node.factNode.id,
+                  id: node.factNode.name,
                   label: node.factNode.label,
                   parentIds: node.factNode.parentsIds,
                   children: node.factNode.children,
