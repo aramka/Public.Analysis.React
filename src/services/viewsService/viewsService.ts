@@ -10,12 +10,6 @@ const viewsByEntity: Record<string, Record<string, View>> = {};
 
 const viewsByEntityType: Record<string, Record<string, View>> = {
   [EntityType.Ticker]: {
-    [`${ViewType.DataPoints}-${EntityType.Ticker}-CashFlow`]: {
-      id: `${ViewType.DataPoints}-${EntityType.Ticker}-CashFlow`,
-      viewType: ViewType.DataPoints,
-      entityType: EntityType.Ticker,
-      dataPointSet: "CashFlow"
-    },
     [`${ViewType.TimeSeries}-${EntityType.Ticker}-PaymentsForRepurchaseOfCommonStock`]: {
       id: `${ViewType.TimeSeries}-${EntityType.Ticker}-PaymentsForRepurchaseOfCommonStock`,
       viewType: ViewType.TimeSeries,
